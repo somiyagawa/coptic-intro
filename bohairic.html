@@ -312,6 +312,9 @@ blockquote .aram,blockquote .mani,blockquote .insc,blockquote .hebr{font-size:1.
   .fsz{display:none}
 }
 @media (prefers-reduced-motion:reduce){.bar i,.side{transition:none}}
+.iobox{border-top:1px solid var(--rule);margin-top:12px;padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.io-t{font-weight:700;font-size:.9rem}.io-r{display:flex;flex-wrap:wrap;gap:8px}.io-r .btn{padding:6px 12px;font-size:.85rem}
+#io-text{width:100%;font:12px ui-monospace,monospace;min-width:0}.io-m{font-size:.85rem;color:var(--accent);min-height:1.2em}
 </style>
 
 <header class="top">
@@ -335,6 +338,11 @@ blockquote .aram,blockquote .mani,blockquote .insc,blockquote .hebr{font-size:1.
       <div class="setrow"><label for="st-cs">コプト文字の大きさ</label><select id="st-cs"><option value="1">標準</option><option value="1.18">大</option><option value="1.38">特大</option></select></div>
       <div class="setrow"><label for="st-rs">ルビの大きさ</label><select id="st-rs"><option value="0.88">小</option><option value="1">標準</option><option value="1.2">大</option></select></div>
       <div class="setfoot"><button type="button" class="linkbtn" data-go="apxC">グロスの略号一覧</button><button type="button" class="linkbtn" id="st-reset">初期設定に戻す</button></div>
+      <div class="iobox"><div class="io-t">学習の記録（進み具合・練習の答え・設定）</div>
+        <div class="io-r"><button type="button" class="btn ghost" id="io-save">ファイルに保存</button><button type="button" class="btn ghost" id="io-load">ファイルから読み込む</button><input type="file" id="io-file" accept=".json,application/json" hidden></div>
+        <div class="io-r"><button type="button" class="btn ghost" id="io-copy">コードをコピー</button><button type="button" class="btn ghost" id="io-paste">コードから読み込む</button></div>
+        <textarea id="io-text" rows="2" placeholder="ファイルが使えないときは、ここにコードを貼り付けて「コードから読み込む」を押します" aria-label="学習記録のコード"></textarea>
+        <div class="io-m" id="io-msg" role="status"></div></div>
     </div>
   </div>
 </header>
@@ -6710,6 +6718,32 @@ document.addEventListener('stepchange',function(){ if(pres.on) setTimeout(inkFit
 window.addEventListener('resize',function(){ if(pres.on) inkFit() });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&pres.on&&$('set-panel').hidden) presEnd() });
 document.addEventListener('click',function(e){ if(e.target.closest('[data-pres]')) presStart() });
+(function(){
+  var $=function(i){return document.getElementById(i)}, msg=$('io-msg'); if(!$('io-save')) return;
+  function say(t){msg.textContent=t}
+  function pack(){return JSON.stringify({app:KEY,saved:new Date().toISOString(),data:S})}
+  function unpack(t){
+    var o; try{o=JSON.parse(t)}catch(e){say('読み込めませんでした。記録のファイルまたはコードではありません。'); return}
+    if(!o||o.app!==KEY||!o.data||typeof o.data!=='object'){say('このコースの記録ではありません（別の方言の記録かもしれません）。'); return}
+    for(var k in o.data) S[k]=o.data[k];
+    save(); say('読み込みました。画面を更新します。'); setTimeout(function(){location.reload()},700);
+  }
+  $('io-save').addEventListener('click',function(){
+    try{var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([pack()],{type:'application/json'}));
+      a.download=KEY+'-'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); a.remove();
+      say('ファイルに保存しました。保存されないときは「コードをコピー」を使ってください。');
+    }catch(e){say('この環境ではファイルに保存できません。「コードをコピー」を使ってください。')}
+  });
+  $('io-load').addEventListener('click',function(){$('io-file').click()});
+  $('io-file').addEventListener('change',function(){var f=this.files&&this.files[0]; if(!f) return; var r=new FileReader(); r.onload=function(){unpack(String(r.result))}; r.readAsText(f); this.value=''});
+  $('io-copy').addEventListener('click',function(){
+    var t=pack(), ta=$('io-text'); ta.value=t;
+    var done=function(){say('コードをコピーしました。メモなどに貼り付けて保管してください。')};
+    var fb=function(){ta.focus(); ta.select(); say('コードを下の欄に表示しました。選択してコピーしてください。')};
+    try{navigator.clipboard.writeText(t).then(done,fb)}catch(e){fb()}
+  });
+  $('io-paste').addEventListener('click',function(){var t=$('io-text').value.trim(); if(!t){say('下の欄にコードを貼り付けてから押してください。'); return} unpack(t)});
+})();
 var h0=''; try{h0=(location.hash||'').slice(1)}catch(e){}
 if(h0 && $(h0) && h0!=='home') show(h0); else refresh();
 })();
