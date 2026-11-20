@@ -24,14 +24,19 @@ def word_of(rw):
     m = re.search(r'<span class="w0">(.*?)</span>', rw)
     return re.sub(r'<[^>]+>', '', m.group(1) if m else rw)
 
+RK = re.compile(r'(<span class="rk">)(.*?)(</span></span><span class="rw">)', re.S)
+COPT = re.compile('[\u2c80-\u2cff\u03e2-\u03ef][\u2c80-\u2cff\u03e2-\u03ef\u0300-\u036f\ufe24-\ufe26⸗]*')
+
 def kana_sahidic(t):
     stat = {'units': 0, 'changed': 0, 'problems': []}
     def f(m):
-        w = word_of(m.group(4)); k2, st = kana_s.patch(w, m.group(2)); stat['units'] += 1
+        w = COPT.search(t, m.end(), m.end() + 1500); stat['units'] += 1
+        if not w: stat['problems'].append(('noword', m.group(2))); return m.group(0)
+        w = w.group(0); k2, st = kana_s.patch(w, m.group(2))
         if st[0] in ('ambiguous', 'nomatch') or st[1].startswith('count'): stat['problems'].append((w, m.group(2), st))
         if k2 != m.group(2): stat['changed'] += 1
-        return m.group(1) + k2 + m.group(3) + m.group(4) + m.group(5)
-    t = UNIT.sub(f, t)
+        return m.group(1) + k2 + m.group(3)
+    t = RK.sub(f, t)
     # 語彙データ（クイズ・フラッシュカード）
     m = re.search(r'(<script id="data" type="application/json">)(.*?)(</script>)', t, re.S)
     D = json.loads(m.group(2)); n = 0

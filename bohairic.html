@@ -11262,6 +11262,20 @@ function firstReal(p){var f=p.firstChild; while(f&&f.nodeType===3&&!f.data.trim(
 function quoteEnd(s){ if(s.charAt(0)!=='「') return -1; var d=0,i,c; for(i=0;i<s.length;i++){c=s.charAt(i); if(c==='「') d++; else if(c==='」'){d--; if(d===0) return i+1}} return -1}
 function restBlank(n){ for(n=n.nextSibling;n;n=n.nextSibling){ if(n.nodeType===3){ if(n.data.trim()) return false } else return false } return true }
 
+/* 0. ルビが二重に付いている箇所（解答欄など）を一重に戻す */
+function flatten(root){
+  for(var pass=0;pass<3;pass++){
+    var outers=[];
+    root.querySelectorAll('.rw .copt').forEach(function(c){ var o=c.parentNode.closest('.rb'); if(o&&!(o.parentNode.closest&&o.parentNode.closest('.rb'))&&outers.indexOf(o)<0) outers.push(o) });
+    if(!outers.length) return;
+    outers.forEach(function(o){
+      var inner=o.querySelector('.w0 .copt')||o.querySelector('.rw .copt'); if(!inner||!o.parentNode) return;
+      while(inner.firstChild) o.parentNode.insertBefore(inner.firstChild,o);
+      o.remove();
+    });
+  }
+}
+
 /* 1. 見出しつきの項目 */
 function points(root){
   root.querySelectorAll('li').forEach(function(li){
@@ -11533,7 +11547,7 @@ window.__rsEnh=function(sec){
   var body=sec.querySelector('.lesson-body'); if(!body) return;
   try{
     body.querySelectorAll('.step').forEach(function(st){var h=st.querySelector('h3'); if(h&&/この課の要点/.test(h.textContent)) st.classList.add('kp')});
-    points(body); igtItems(body); readings(body); prose(body); tables(body); bound(body); vbar(sec);
+    flatten(body); points(body); igtItems(body); readings(body); prose(body); tables(body); bound(body); vbar(sec);
   }catch(err){ if(window.console) console.error('rs',err) }
 };
 })();
