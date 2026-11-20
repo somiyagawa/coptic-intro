@@ -316,85 +316,145 @@ blockquote .aram,blockquote .mani,blockquote .insc,blockquote .hebr{font-size:1.
 .io-t{font-weight:700;font-size:.9rem}.io-r{display:flex;flex-wrap:wrap;gap:8px}.io-r .btn{padding:6px 12px;font-size:.85rem}
 #io-text{width:100%;font:12px ui-monospace,monospace;min-width:0}.io-m{font-size:.85rem;color:var(--accent);min-height:1.2em}
 
-/* ================= RS v2：読みやすさの層（tools/restyle.py が差し込む） ================= */
+/* ================= RS v3：読みやすさの層（tools/restyle.py が差し込む） =================
+   方針
+   1. 文字を大きくする：本文 18px、例文のコプト語は本文の約1.6倍、読みとグロスは 14〜15px。
+   2. 行の高さをそろえる：説明文の中のルビは行の高さに影響させず、その段落の行間を一定にする。
+   3. 面をはっきりさせる：本文の面は不透明にし、背景の質感と周辺の陰りは面の外だけに残す。 */
+:root{--fs:18px}
 main{--u:var(--fs)}
 html.pres main{--u:calc(var(--fs)*1.4)}
-:root{--pop:var(--surface);--rt-n:2}
+:root{--pop:var(--surface);--rt-n:2;--prn:1;--plh:2.15}
 :root[data-ruby="kana"],:root[data-ruby="latin"]{--rt-n:1}
-:root[data-ruby="off"]{--rt-n:0}
+:root[data-ruby="off"]{--rt-n:0;--prn:0;--plh:1.9}
+:root[data-ruby="both"][data-prose="both"]{--prn:2;--plh:2.95}
 
-/* 背景の質感は残し、本文の面を不透明に近づける */
-:root[data-skin="papyrus"]{--surface:rgba(254,249,236,.97);--code:rgba(84,56,18,.065);--muted:#5a4526;--ok:#2f5216;--pop:#fcf6e5}
-:root[data-skin="parch"]{--surface:rgba(255,252,241,.94);--code:rgba(90,66,28,.07);--muted:#5d4c30;--pop:#fcf7e8}
-:root[data-skin="ostr"]{--surface:rgba(251,238,225,.94);--code:rgba(50,25,10,.08);--pop:#f8eadb}
+/* 本文の面は不透明に。質感と陰りは面の外だけ */
+:root[data-skin="papyrus"]{--surface:#fffaee;--code:rgba(96,62,16,.07);--muted:#56411e;--ok:#2b4f13;--pop:#fffaee;--rule:rgba(84,56,18,.3);--accent-soft:rgba(122,42,18,.11)}
+:root[data-skin="parch"]{--surface:#fffcf3;--code:rgba(90,66,28,.07);--muted:#594829;--pop:#fffcf3}
+:root[data-skin="ostr"]{--surface:#fcf0e4;--code:rgba(50,25,10,.075);--pop:#fcf0e4}
 :root[data-skin="papyrus"] body{background-image:linear-gradient(rgba(243,231,198,.8),rgba(243,231,198,.8)),var(--bgimg);background-size:auto,900px 900px}
+:root[data-tex] body::after{z-index:-1}
+:root[data-tex] input,:root[data-tex] textarea,:root[data-tex] select{background-color:var(--surface)}
+:root[data-tex] .setpanel{background:var(--surface)}
+.setpanel{max-height:calc(100vh - 84px);overflow-y:auto;overscroll-behavior:contain}
+:root[data-skin="papyrus"]{--ok-soft:rgba(70,120,30,.13)}
 
 /* ---- 全体の文字と余白 ---- */
-body{line-height:1.85}
-.side .nav{font-size:.9rem;padding:7px 8px;line-height:1.45}
-.side h3{font-size:.78rem;margin-top:20px}
-.lmeta{font-size:.88em}
-.stabs{gap:8px;margin:18px 0 12px}
-.stab{font-size:.9em;padding:8px 16px;line-height:1.4}
-.stab b{opacity:.7}
-.stab[aria-current="step"]{font-weight:700;box-shadow:0 2px 8px rgba(60,30,5,.22)}
-.stab[aria-current="step"] b{opacity:1}
-.allbtn{font-size:.85em}
-.step{padding:26px 30px 28px}
-.lesson-body .step h3{font-size:1.32em;padding-bottom:10px;border-bottom:2px solid var(--rule);margin-bottom:18px}
-.lesson-body p{max-width:46em;margin:0 0 16px}
-.lesson-body ul,.lesson-body ol{max-width:46em;counter-reset:igt}
+body{line-height:1.9}
+.view{max-width:880px}
+h2{font-size:1.7em}
+.eyebrow{font-size:.86em}
+.lmeta{font-size:.9em}
+.lesson-body p{max-width:42em;margin:0 0 16px}
+.lesson-body ul,.lesson-body ol{max-width:42em;counter-reset:igt}
 .lesson-body li{margin:7px 0}
 .lesson-body li::marker{color:var(--accent)}
-.stepnav .btn{font-size:1em;padding:11px 22px}
-.stepnav .pos{font-size:.9em}
+.lesson-body strong{font-weight:700}
+
+/* 上の帯 */
+.brand{font-size:1.05rem}
+.prog{font-size:.85rem}
+.search{max-width:340px}
+.search input{font-size:.95rem;padding:9px 13px;border-color:color-mix(in srgb,var(--fg) 30%,transparent)}
+.search input::placeholder{color:var(--muted);opacity:1}
+.rb-btn{font-size:.9rem;padding:7px 12px;border-color:color-mix(in srgb,var(--fg) 30%,transparent);border-radius:8px}
+.menu{font-size:.95rem;padding:7px 12px;border-color:color-mix(in srgb,var(--fg) 30%,transparent);border-radius:8px}
+.setpanel{font-size:.95rem;width:min(380px,calc(100vw - 32px))}
+.setpanel h4{font-size:1.05rem}
+
+/* 目次 */
+.side h3{font-size:.82rem;font-weight:700;margin-top:22px;letter-spacing:.1em}
+.side .nav{font-size:.95rem;padding:8px 10px;line-height:1.45;grid-template-columns:18px 1.9em 1fr;border-radius:8px}
+.side .nav.tool{grid-template-columns:18px 1fr}
+.nav .n{font-family:var(--font-body);font-size:.88rem;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;padding-right:2px}
+.nav .ck{width:15px;height:15px;border-color:color-mix(in srgb,var(--fg) 38%,transparent)}
+.nav[aria-current="page"]{box-shadow:inset 4px 0 0 var(--accent)}
+
+/* ステップの見出し */
+.stabs{gap:8px;margin:18px 0 12px}
+.stab{font-size:.95em;padding:9px 17px;line-height:1.4;color:var(--fg);border-color:color-mix(in srgb,var(--fg) 26%,transparent)}
+.stab b{color:var(--accent)}
+.stab[aria-current="step"]{font-weight:700;box-shadow:0 2px 8px rgba(60,30,5,.22)}
+.stab[aria-current="step"] b{color:inherit}
+.allbtn{font-size:.9em}
+.step{padding:28px 32px 30px}
+.lesson-body .step h3{font-size:1.36em;padding-bottom:10px;border-bottom:2px solid var(--rule);margin-bottom:20px}
+.stepnav .btn{font-size:1.05em;padding:12px 24px}
+.stepnav .pos{font-size:.95em}
 @media (max-width:900px){.step{padding:20px 16px 22px}}
+
+/* ステップに分かれていない章（文法編・付録・はじめに）も、本文を一枚の面に載せる */
+.lesson-body.sheet{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:28px 32px 30px;min-width:0}
+:root[data-tex] .lesson-body.sheet{box-shadow:0 1px 0 rgba(255,250,230,.45) inset,0 1px 3px rgba(60,40,10,.2)}
+.lesson-body.sheet>:first-child{margin-top:0}
+.lesson-body.sheet>:last-child{margin-bottom:0}
+.lesson-body.sheet h3{font-size:1.22em;margin:38px 0 14px;padding:2px 0 2px 14px;border-left-width:5px}
+@media (max-width:900px){.lesson-body.sheet{padding:20px 16px 22px}}
+html.pres .lesson-body.sheet{padding:28px 34px}
 
 /* この課の要点 */
 .step.kp{border-left:6px solid var(--accent)}
-.step.kp li{margin:10px 0;line-height:1.8}
+.step.kp li{margin:10px 0}
 
 /* 見出しつきの項目（太字の見出し＋説明） */
-.lesson-body li.pt{list-style:none;margin:0 0 14px -1.4em;padding:13px 18px 12px 16px;border-left:4px solid var(--accent);background:var(--code);border-radius:0 10px 10px 0}
-.pt-h{font-family:var(--font-display);font-weight:700;font-size:1.05em;line-height:1.5;margin:0 0 5px}
-.pt-b{line-height:1.85}
+.lesson-body li.pt{list-style:none;margin:0 0 14px -1.4em;padding:14px 20px 13px 18px;border-left:5px solid var(--accent);background:var(--code);border-radius:0 12px 12px 0}
+.pt-h{font-family:var(--font-display);font-weight:700;font-size:1.08em;line-height:1.5;margin:0 0 7px}
+.pt-b{line-height:1.9}
+.pt-b.lh{padding-top:.18em}
 .lesson-body ul.pts{max-width:none}
 
 /* 他の文法書・出典 */
-.lesson-body p.refp{font-size:.82em;line-height:1.7;color:var(--muted);border-top:1px dashed var(--rule);padding-top:10px;max-width:none}
+.lesson-body p.refp{font-size:.84em;line-height:1.7;color:var(--muted);border-top:1px dashed var(--rule);padding-top:10px;max-width:none}
 .lesson-body p.refp strong{font-weight:700}
 
 /* ---- 表 ---- */
-table{font-size:.95em;line-height:1.6}
-th,td{padding:9px 14px;white-space:normal;vertical-align:top}
+.step .tbl,.tbl{background:var(--surface);border-radius:10px;border-color:color-mix(in srgb,var(--fg) 24%,transparent)}
+table{font-size:.97em;line-height:1.6}
+th,td{padding:11px 16px;white-space:normal;vertical-align:baseline}
 td{min-width:3.4em}
-th{font-weight:700;font-size:.86em;white-space:nowrap;vertical-align:middle}
+thead th{font-weight:700;font-size:.88em;white-space:nowrap;vertical-align:middle;border-bottom:2px solid color-mix(in srgb,var(--fg) 24%,transparent)}
 td:last-child,th:last-child{min-width:8em}
 tbody tr:nth-child(even)>td{background:color-mix(in srgb,var(--fg) 3.5%,transparent)}
+td .copt,th .copt{font-size:calc(1.42em * var(--cs,1))}
+td.lh .copt{font-size:calc(1.3em * var(--cs,1))}
+table.has-tr td:first-child .rt .rl{display:none}
+table.has-tr td:first-child .copt{font-size:calc(1.62em * var(--cs,1))}
+td.nw{font-weight:700}
 .bg{white-space:nowrap}
+.bg>.rb.ip{margin:0 .03em!important}
 td.nw{white-space:nowrap}
 
 /* ---- ルビとグロスの文字 ---- */
-.rt{font-size:calc(var(--u)*.7*var(--rs,1));line-height:1.25}
+.rt{font-size:calc(var(--u)*.78*var(--rs,1));line-height:1.25}
+.rt .rl,.rt .rk{font-size:1em;height:1.25em;overflow:visible}
 .rt .rl{color:var(--muted)}
-.rt .rk{font-size:1em;color:var(--accent)}
-.gl,.gp{font-size:calc(var(--u)*.76);line-height:1.4;letter-spacing:0}
-.gl{color:var(--fg);margin-top:4px}
+.rt .rk{color:var(--accent);font-weight:500}
+.gl,.gp{font-size:calc(var(--u)*.82);line-height:1.4;letter-spacing:0}
+.gl{color:var(--fg);margin-top:5px}
 .gp{color:var(--ok);margin-top:1px}
-.sc{color:var(--accent);font-weight:500;letter-spacing:.02em}
+.sc{color:var(--accent);font-weight:500;letter-spacing:.02em;font-size:1.04em}
 .pc{margin-left:.06em}
 
+/* 説明文の中の語：ルビは一行（カナ）にして行の高さに数えず、段落の行間を一定にする */
+:root:not([data-gloss="all"]) .rb.ip .rt{font-size:calc(var(--u)*.68*var(--rs,1));margin:calc(var(--prn) * -1.25em) -.35em 0;position:relative;top:.32em}
+:root:not([data-gloss="all"])[data-ruby="both"]:not([data-prose="both"]) .rb.ip .rt .rl{display:none}
+:root:not([data-gloss="all"]) .lh{line-height:var(--plh)}
+:root:not([data-gloss="all"]) .rb.ip{margin:0 .12em}
+:root:not([data-gloss="all"]) .lh .copt{word-spacing:.16em}
+
 /* 行間グロスを並べる場所：例文（.igt-l）、説明文から取り出した例（.igx-l）、講読本文 */
+:is(.igt-l,.igx-l) .copt{font-size:calc(1.6em * var(--cs,1))}
 :root[data-gloss="ex"] :is(.igt-l,.igx-l,blockquote) .rb.g,
 :root[data-gloss="all"] .rb.g,
-:root[data-gloss="text"] blockquote .rb.g{text-align:left;margin:0 1.15em .7em 0}
+:root[data-gloss="text"] blockquote .rb.g{text-align:left;margin:0 1.25em .75em 0}
 :root[data-gloss="ex"] :is(.igt-l,.igx-l,blockquote) .rb.g :is(.rw,.rbi){text-align:left}
 :root[data-gloss="ex"]:not([data-gl="off"]) :is(.igt-l,.igx-l,blockquote) .rb.g .gl{display:block}
 :root[data-gloss="ex"]:not([data-gp="off"]) :is(.igt-l,.igx-l,blockquote) .rb.g .gp{display:block}
 
 /* グロスを並べない場所の語：押すと分析が出る */
 .rb.g{cursor:pointer;border-radius:5px}
-.rb.g .rw{text-decoration:underline dotted;text-decoration-color:color-mix(in srgb,var(--muted) 60%,transparent);text-decoration-thickness:1px;text-underline-offset:.3em}
+.rb.g .rw{text-decoration:underline dotted;text-decoration-color:color-mix(in srgb,var(--muted) 70%,transparent);text-decoration-thickness:1.5px;text-underline-offset:.3em}
 :root[data-gloss="ex"] :is(.igt-l,.igx-l,blockquote) .rb.g .rw,
 :root[data-gloss="all"] .rb.g .rw,
 :root[data-gloss="text"] blockquote .rb.g .rw,
@@ -403,60 +463,62 @@ td.nw{white-space:nowrap}
 .fig .rb.g{cursor:default}
 
 /* ---- 例文（番号つき） ---- */
-.lesson-body ul.igts{list-style:none;padding:0;margin:6px 0 18px;max-width:none}
-.lesson-body li.igt{list-style:none;display:grid;grid-template-columns:2.5em minmax(0,1fr);column-gap:4px;margin:0;padding:15px 0 12px;border-top:1px solid var(--rule)}
-.lesson-body ul.igts>li.igt:first-child{border-top:0;padding-top:4px}
-.lesson-body li.igt.lone{margin-left:-1.4em}
-li.igt::before{counter-increment:igt;content:"(" counter(igt) ")";font-family:var(--font-lat);font-size:.95em;color:var(--muted);line-height:1.3;
-  margin-top:calc(var(--rt-n)*var(--u)*.7*var(--rs,1)*1.25 + .3em)}
+.lesson-body ul.igts{list-style:none;padding:0;margin:8px 0 20px;max-width:none;display:grid;gap:12px}
+.lesson-body li.igt{list-style:none;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:14px;margin:0;padding:16px 20px 13px 14px;
+  border:1px solid var(--rule);border-radius:12px;background:var(--code)}
+.lesson-body li.igt.lone{margin:0 0 12px -1.4em}
+.pt li.igt{background:var(--surface)}
+li.igt::before{counter-increment:igt;content:counter(igt);display:grid;place-items:center;width:1.9em;height:1.9em;border-radius:50%;
+  background:var(--accent);color:var(--on-accent);font-family:var(--font-body);font-weight:700;font-size:.82em;line-height:1;font-variant-numeric:tabular-nums}
 .igt-b{min-width:0}
 .igt-l,.igx-l,.vl{display:block;line-height:1.3}
-.igt-t,.igx-t{display:block;font-size:1em;line-height:1.75;margin-top:-.25em}
-.igt-s,.igx-s{display:block;font-size:.8em;line-height:1.6;color:var(--muted);margin-top:2px}
+.igt-t,.igx-t{display:block;font-size:1.06em;font-weight:500;line-height:1.7;padding-top:.45em;border-top:1px dashed var(--rule)}
+.igt-s,.igx-s{display:block;font-size:.84em;line-height:1.6;color:var(--muted);margin-top:2px}
 .igt-s small{font-size:1em}
 :is(.igt-l,.igx-l) .rb:not(.g){margin-bottom:.5em}
 
 /* 説明文の中から取り出した例 */
-.igx{display:block;margin:10px 0 12px;padding:12px 16px 9px;background:var(--code);border:1px solid var(--rule);border-radius:10px;text-indent:0}
+.igx{display:block;margin:12px 0 14px;padding:14px 18px 11px;background:var(--code);border:1px solid var(--rule);border-radius:12px;text-indent:0;line-height:1.9}
 .pt .igx{background:var(--surface)}
 .igx + .igx{margin-top:-4px}
 
 /* ---- 講読本文 ---- */
-blockquote.rd{font-family:inherit;font-size:1em;line-height:1.5;padding:4px 20px 6px 16px;border-left-width:5px}
-blockquote.rd .copt{font-size:calc(1.4em*var(--cs,1));line-height:1.35}
+blockquote.rd{font-family:inherit;font-size:1em;line-height:1.5;padding:4px 22px 6px 18px;border-left-width:5px;border-radius:0 12px 12px 0}
+blockquote.rd .copt{font-size:calc(1.6em * var(--cs,1));line-height:1.35}
 blockquote.rd .rb{margin-bottom:.5em}
-.vs{display:grid;grid-template-columns:2.3em minmax(0,1fr);column-gap:8px;padding:16px 0 12px;border-top:1px solid var(--rule)}
+.vs{display:grid;grid-template-columns:2.4em minmax(0,1fr);column-gap:8px;padding:18px 0 14px;border-top:1px solid var(--rule)}
 .vs:first-child{border-top:0}
 .vs.nolab{grid-template-columns:minmax(0,1fr)}
-.vn{font-family:var(--font-lat);font-weight:700;font-size:1.1em;color:var(--accent);line-height:1.3;
-  margin-top:calc(var(--rt-n)*var(--u)*.7*var(--rs,1)*1.25 + .42em)}
+.vn{display:grid;place-items:center;width:1.9em;height:1.9em;border-radius:50%;background:var(--accent);color:var(--on-accent);
+  font-family:var(--font-body);font-weight:700;font-size:.82em;line-height:1;font-variant-numeric:tabular-nums}
 .vbody{min-width:0}
 .lb{display:block;height:0}
-.lesson-body p.vt{margin:-.15em 0 0;font-size:.98em;line-height:1.8;max-width:none}
+.lesson-body p.vt{margin:0;padding-top:.45em;border-top:1px dashed var(--rule);font-size:1.06em;font-weight:500;line-height:1.8;max-width:none}
 .lesson-body p.vt::before,.lesson-body p.trp::before{content:"訳";display:inline-block;font-size:.72em;font-weight:700;line-height:1.5;color:var(--on-accent);background:var(--accent);border-radius:4px;padding:0 6px;margin-right:8px;vertical-align:.12em}
-.lesson-body p.trp{background:var(--code);border-radius:10px;padding:12px 16px;max-width:none;line-height:1.85}
+.lesson-body p.trp{background:var(--code);border-radius:12px;padding:14px 18px;max-width:none;line-height:1.9;font-size:1.04em}
 :root[data-tr="hide"] p.tr:not(.show)::before{filter:none}
 
 /* ---- 表示の切り替え（凡例をかねる） ---- */
-.vbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px;font-size:.8rem;color:var(--muted)}
-.vbar .vb-t{margin-right:2px;font-weight:700}
-.vb{background:var(--surface);border:1px solid var(--rule);border-radius:99px;padding:4px 12px 4px 9px;cursor:pointer;font-size:.8rem;line-height:1.4;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
-.vb::before{content:"";width:.72em;height:.72em;border-radius:50%;border:1.5px solid currentColor;flex:none}
-.vb[aria-pressed="true"]{color:var(--fg);border-color:var(--accent)}
+.vbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px;font-size:.88rem;color:var(--muted)}
+.vbar .vb-t{margin-right:2px;font-weight:700;color:var(--fg)}
+.vb{background:var(--surface);border:1.5px solid color-mix(in srgb,var(--fg) 26%,transparent);border-radius:99px;padding:5px 14px 5px 10px;min-height:34px;cursor:pointer;font-size:.88rem;line-height:1.4;color:var(--muted);display:inline-flex;align-items:center;gap:7px}
+.vb::before{content:"";width:.78em;height:.78em;border-radius:50%;border:1.5px solid currentColor;flex:none}
+.vb[aria-pressed="true"]{color:var(--fg);border-color:var(--accent);font-weight:500}
 .vb[aria-pressed="true"]::before{background:var(--c,var(--accent));border-color:var(--c,var(--accent))}
+.vb[aria-pressed="false"]{background:transparent;border-style:dashed}
 .vb[data-k="latin"]{--c:var(--muted)}.vb[data-k="kana"]{--c:var(--accent)}.vb[data-k="seg"]{--c:var(--fg)}.vb[data-k="gl"]{--c:var(--fg)}.vb[data-k="gp"]{--c:var(--ok)}
-.vbar .vb-h{margin-left:auto;font-size:.78rem}
+.vbar .vb-h{margin-left:auto;font-size:.88rem}
 html.pres .vbar{display:none}
 
 /* ---- 語の分析（押すと出る） ---- */
-.gpop{position:absolute;z-index:90;min-width:9em;max-width:min(92vw,380px);background:var(--pop);color:var(--fg);border:1px solid var(--rule);border-radius:12px;box-shadow:0 10px 30px rgba(30,15,0,.28);padding:12px 16px 12px;font-size:.92rem;line-height:1.55;font-family:var(--font-body)}
-.gpop .pw{font-family:var(--font-copt);font-size:1.7em;line-height:1.35}
-.gpop .pr{font-size:.86em;color:var(--muted)}
+.gpop{position:absolute;z-index:90;min-width:10em;max-width:min(92vw,400px);background:var(--pop);color:var(--fg);border:1.5px solid color-mix(in srgb,var(--fg) 30%,transparent);border-radius:12px;box-shadow:0 10px 30px rgba(30,15,0,.3);padding:14px 18px 14px;font-size:1rem;line-height:1.6;font-family:var(--font-body)}
+.gpop .pw{font-family:var(--font-copt);font-size:1.9em;line-height:1.35}
+.gpop .pr{font-size:.95em;color:var(--muted)}
 .gpop .pr b{font-weight:500;color:var(--accent);margin-right:.6em}
-.gpop .pr i{font-family:var(--font-lat)}
+.gpop .pr i{font-family:var(--font-lat);font-size:1.05em}
 .gpop .pg{margin-top:6px;font-size:1em}
-.gpop .pp{color:var(--ok);font-size:.95em}
-.gpop .pa{margin:8px 0 0;padding:8px 0 0;border-top:1px dashed var(--rule);font-size:.8em;color:var(--muted);display:grid;grid-template-columns:auto 1fr;gap:1px 10px}
+.gpop .pp{color:var(--ok);font-size:1em}
+.gpop .pa{margin:9px 0 0;padding:9px 0 0;border-top:1px dashed var(--rule);font-size:.88em;color:var(--muted);display:grid;grid-template-columns:auto 1fr;gap:2px 12px}
 .gpop .pa dt{font-family:var(--font-body);color:var(--accent);font-weight:500}
 .gpop .pa dd{margin:0}
 .gpop .kc{font-size:.74em;position:relative;top:.22em;font-style:normal}
@@ -464,70 +526,115 @@ html.pres .vbar{display:none}
 /* ---- 確認クイズ・総合クイズ ---- */
 .panel{padding:26px 28px 28px}
 .panel h3{font-size:1.25em;margin-bottom:6px}
-.panel .sub{font-size:.95em;margin-bottom:16px}
-.q-meta{font-size:.95em;color:var(--muted);margin:0 0 8px}
-.q-het{font-size:clamp(2.5rem,7vw,3.5rem);line-height:1.4;margin:6px 0 4px;padding:20px 12px;text-align:center;background:var(--code);border:1px solid var(--rule);border-radius:14px}
-.q-ask{font-size:1.12em;font-weight:500;color:var(--fg);text-align:center;margin:14px 0 14px}
+.panel .sub{font-size:.98em;margin-bottom:16px}
+.q-meta{font-size:1em;color:var(--muted);margin:0 0 8px}
+.q-het{font-size:clamp(3rem,8vw,4rem);line-height:1.4;margin:6px 0 4px;padding:22px 12px;text-align:center;background:var(--code);border:1px solid var(--rule);border-radius:14px}
+.q-ask{font-size:1.18em;font-weight:700;color:var(--fg);text-align:center;margin:16px 0 14px}
 .opts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 14px;counter-reset:opt}
-.opt{font-family:var(--font-body);font-size:1.12em;line-height:1.5;min-height:62px;padding:12px 16px;border-width:2px;border-radius:12px;display:flex;align-items:center;gap:12px;background:var(--surface);color:var(--fg)}
-.opt::before{counter-increment:opt;content:counter(opt);flex:none;width:1.75em;height:1.75em;border-radius:50%;border:1.5px solid var(--rule);display:grid;place-items:center;font-family:var(--font-lat);font-size:.85em;color:var(--muted)}
+.opt{font-family:var(--font-body);font-size:1.2em;line-height:1.5;min-height:66px;padding:12px 16px;border:2px solid color-mix(in srgb,var(--fg) 30%,transparent);border-radius:12px;display:flex;align-items:center;gap:12px;background:var(--surface);color:var(--fg)}
+.opt::before{counter-increment:opt;content:counter(opt);flex:none;width:1.7em;height:1.7em;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--fg) 34%,transparent);display:grid;place-items:center;font-family:var(--font-body);font-size:.78em;font-weight:700;color:var(--muted)}
+.opt:hover:not([disabled]){border-color:var(--accent);background:var(--accent-soft)}
 .opt:disabled{cursor:default;color:var(--fg)}
 .opt:disabled:not(.right):not(.wrong){opacity:.5}
-.opt.right{font-weight:700}
+.opt.right{font-weight:700;border-color:var(--ok)}
+.opt.wrong{border-color:var(--bad)}
 .opt.right::before{content:"○";border-color:transparent;color:var(--ok);font-family:var(--font-body);font-size:1.25em;font-weight:700;width:1.2em;height:1.2em}
 .opt.wrong::before{content:"×";border-color:transparent;color:var(--bad);font-family:var(--font-body);font-size:1.25em;font-weight:700;width:1.2em;height:1.2em}
-.q-fb{font-size:1.05em;line-height:1.7;min-height:1.9em;margin:0 0 12px}
+.q-fb{font-size:1.1em;line-height:1.7;min-height:1.9em;margin:0 0 12px}
 .q-fb.ok{color:var(--ok);font-weight:700}
 .q-fb.ng{color:var(--bad);font-weight:700}
-.panel .btn.small{font-size:1em;padding:12px 28px}
+.panel .btn.small{font-size:1.05em;padding:12px 28px}
 .panel .q-het + .q-ask + .btn{margin-top:6px}
 @media (max-width:560px){.opts{grid-template-columns:1fr}.panel{padding:20px 16px 22px}}
 
 /* フラッシュカード */
-.card{min-height:260px;gap:12px}
-.card .front{font-size:clamp(2.6rem,8vw,3.6rem);line-height:1.3}
-.card .back{font-family:var(--font-body);font-size:1.6em;line-height:1.5}
-.card .mean{font-size:1.1em}
-.card .hint{font-size:.9em}
-#card-meta{font-size:.95em}
-.filters .chip{font-size:.88em;padding:6px 14px}
-#cards .row .btn{font-size:1em;padding:11px 22px}
+.card{min-height:270px;gap:12px}
+.card .front{font-size:clamp(3rem,9vw,4rem);line-height:1.3}
+.card .back{font-family:var(--font-body);font-size:1.65em;line-height:1.5}
+.card .mean{font-size:1.15em}
+.card .hint{font-size:.92em}
+#card-meta{font-size:1em}
+.filters .chip{font-size:.92em;padding:7px 15px;color:var(--fg);border-color:color-mix(in srgb,var(--fg) 26%,transparent)}
+#cards .row .btn{font-size:1.02em;padding:11px 22px}
+
+/* 練習 */
+.ex{padding:16px 18px;gap:12px}
+.ex-n{font-family:var(--font-body);font-weight:700;font-size:.86em}
+.ex textarea{font-size:1.02em;padding:10px 12px;border-color:color-mix(in srgb,var(--fg) 30%,transparent)}
+.ans{padding:12px 16px;font-family:var(--font-body)}
+
+/* ホーム */
+.hero p{color:var(--fg);font-size:1.02rem;max-width:42em}
+.scripts small{font-size:.85rem;font-family:var(--font-body)}
+.btn{font-size:1rem;padding:11px 20px}
+.h-sec{font-size:1.2rem}
+.track-desc,.trk .track-desc{font-size:.92rem}
+.lcard{font-size:.95rem;padding:11px 13px;border-color:color-mix(in srgb,var(--fg) 22%,transparent)}
+.lcard .ls{border-color:color-mix(in srgb,var(--fg) 38%,transparent)}
+.how{font-size:.95rem;color:var(--fg)}
+.hit{font-size:1rem}
+.foot{font-size:.85rem}
 
 /* 画面の見方（ホーム） */
 .guide{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:20px 22px 18px;display:grid;gap:14px;min-width:0}
 .guide .vbar{margin:0}
-.guide-ex{background:var(--code);border:1px solid var(--rule);border-radius:10px;padding:16px 18px 10px;overflow-x:auto;min-width:0}
-.guide-ex .igt-l{white-space:nowrap}
-.guide ul{margin:0;padding-left:1.3em;font-size:.93rem;line-height:1.85;max-width:46em}
+.guide-ex{background:var(--code);border:1px solid var(--rule);border-radius:12px;padding:16px 18px 12px;overflow-x:auto;min-width:0}
+.guide-ex .igt-l{white-space:nowrap;font-size:var(--fs)}
+.guide-ex .rt{font-size:calc(var(--fs)*.78*var(--rs,1))}
+.guide-ex .gl,.guide-ex .gp{font-size:calc(var(--fs)*.82)}
+.guide ul{margin:0;padding-left:1.3em;font-size:.97rem;line-height:1.9;max-width:44em}
 .guide li{margin:3px 0}
 .rb.g.lab{cursor:default;margin-right:1.1em!important;padding-right:1em;border-right:1px solid var(--rule)}
 .rb.g.lab .rw{text-decoration:none!important;background:none!important}
-.rb.g.lab .rw small{font-family:var(--font-body);font-size:.52em;font-weight:700;color:var(--fg)}
+.rb.g.lab .rw small{font-family:var(--font-body);font-size:.5em;font-weight:700;color:var(--fg)}
 .rb.g.lab .rt .rl{font-style:normal;font-family:var(--font-body);font-weight:700}
 .rb.g.lab .rt .rk,.rb.g.lab .gl,.rb.g.lab .gp{font-weight:700}
 .guide-ex .igt-t b{display:inline-block;font-size:.72em;line-height:1.5;color:var(--on-accent);background:var(--accent);border-radius:4px;padding:0 6px;margin-right:8px;vertical-align:.12em}
 
-/* 画面の狭い端末：ステップの見出しは横に送る */
+/* 目次をたたむ幅では、上の帯から進み具合の表示を外す（目次とホームにある） */
+@media (max-width:900px){.top .prog{display:none}}
+
+/* 画面の狭い端末 */
 @media (max-width:700px){
-  .stabs{flex-wrap:nowrap;overflow-x:auto;margin-right:-16px;padding:4px 16px 8px 2px;scrollbar-width:none}
-  .stabs::-webkit-scrollbar{display:none}
-  .stab,.stabs .allbtn{flex:none;white-space:nowrap}
+  /* 上の帯を二段にまとめる：目次・題・表示設定／検索・方言選択 */
+  .top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px 10px;align-items:center}
+  .top .menu{grid-column:1;grid-row:1}
+  .top .brand{grid-column:2;grid-row:1;text-align:left;font-size:.95rem;line-height:1.35;white-space:normal;word-break:keep-all}
+  .top .setwrap{grid-column:3;grid-row:1}
+  .top .prog{display:none}
+  .top .search{grid-column:1/3;grid-row:2;max-width:none;margin:0}
+  .top>a.rb-btn{grid-column:3;grid-row:2;text-align:center}
+  .top:not(:has(>a.rb-btn)) .search{grid-column:1/-1}
+  /* ステップの見出しと表示の切り替えは横に送る */
+  .stabs,.vbar{flex-wrap:nowrap;overflow-x:auto;margin-right:-16px;padding:4px 16px 8px 2px;scrollbar-width:none}
+  .stabs::-webkit-scrollbar,.vbar::-webkit-scrollbar{display:none}
+  .stabs,.vbar{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 34px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 34px),transparent)}
+  .stab,.stabs .allbtn,.vbar .vb,.vbar .vb-h{flex:none;white-space:nowrap}
   .stabs .allbtn,.stabs .presgo{margin-left:0}
-  :root[data-gloss="ex"] :is(.igt-l,.igx-l,blockquote) .rb.g,:root[data-gloss="all"] .rb.g,:root[data-gloss="text"] blockquote .rb.g{margin-right:.85em}
-  .vs{grid-template-columns:1.7em minmax(0,1fr);column-gap:4px}
-  .lesson-body li.igt{grid-template-columns:2.1em minmax(0,1fr)}
+  .vbar{margin-bottom:8px}
+  .vbar .vb-t{display:none}
+  .vbar .vb-h{margin-left:4px}
+  :root[data-gloss="ex"] :is(.igt-l,.igx-l,blockquote) .rb.g,:root[data-gloss="all"] .rb.g,:root[data-gloss="text"] blockquote .rb.g{margin-right:.95em}
+  .vs{grid-template-columns:2.1em minmax(0,1fr);column-gap:4px}
+  .lesson-body li.igt{column-gap:10px;padding:14px 14px 11px 12px}
   blockquote.rd{padding:2px 12px 4px 10px}
-  .igx{padding:10px 12px 8px}
+  .igx{padding:12px 14px 9px}
+  :is(.igt-l,.igx-l) .copt,blockquote.rd .copt{font-size:calc(1.5em * var(--cs,1))}
+  th,td{padding:9px 11px}
+  .lesson-body li.pt{padding:12px 14px 11px 13px}
+}
+@media (max-width:560px){
+  main{font-size:calc(var(--fs) - 1px);--u:calc(var(--fs) - 1px)}
 }
 
 /* 設定の補足 */
-.sethint{font-size:.78rem;color:var(--muted);line-height:1.6;margin:-6px 0 0}
-/* ================= /RS v2 ================= */
+.sethint{font-size:.84rem;color:var(--muted);line-height:1.6;margin:-6px 0 0}
+/* ================= /RS v3 ================= */
 </style>
 
 <header class="top">
   <button class="menu" id="menu" type="button" aria-label="目次を開く" aria-controls="side">目次</button>
-  <button class="brand" id="home-btn" type="button">基礎コプト語サイード方言文法入門</button>
+  <button class="brand" id="home-btn" type="button">基礎コプト語<wbr>サイード方言<wbr>文法入門</button>
   <div class="prog" aria-live="polite"><span class="bar"><i id="pbar"></i></span><span id="ptxt">0 / 24 課</span></div>
   <div class="search"><input id="q" type="search" placeholder="全課を検索（例：ⲛ̄ϭⲓ、関係節、完了）" aria-label="全課を検索"></div>
   <a class="rb-btn" href="index.html" style="text-decoration:none;white-space:nowrap">方言選択</a><div class="setwrap">
@@ -537,13 +644,14 @@ html.pres .vbar{display:none}
       <div class="setrow"><label for="st-kana">カタカナ（授業の発音）</label><input type="checkbox" id="st-kana"></div>
       <div class="setrow"><label for="st-latin">ラテン文字転写</label><input type="checkbox" id="st-latin"></div>
       <div class="setrow"><label for="st-skin">背景</label><select id="st-skin"><option value="parch">羊皮紙</option><option value="papyrus">パピルス</option><option value="ostr">オストラコン</option><option value="white">白基調</option><option value="dark">ダーク</option><option value="std">自動（白／ダーク）</option></select></div>
+      <div class="setrow"><label for="st-prose">説明文の中のルビ</label><select id="st-prose"><option value="kana">カナだけ</option><option value="both">転写とカナ</option></select></div>
       <div class="setrow"><label for="st-seg">形態素の区切り（- ⸗ †）</label><input type="checkbox" id="st-seg"></div>
       <div class="setrow"><label for="st-gloss">グロスを並べる範囲</label><select id="st-gloss"><option value="all">例文と講読本文</option><option value="every">説明文や表の中にも</option><option value="text">講読本文のみ</option><option value="off">並べない</option></select></div>
       <p class="sethint">グロスを並べていない語は、押すと分析（区切り・読み・グロス・略号の意味）が出ます。</p>
       <div class="setrow"><label for="st-gl">言語学のグロス（3SG.M など）</label><input type="checkbox" id="st-gl"></div>
       <div class="setrow"><label for="st-gp">やさしいグロス（「彼」など）</label><input type="checkbox" id="st-gp"></div>
       <div class="setrow"><label for="st-tr">講読の日本語訳</label><select id="st-tr"><option value="show">表示する</option><option value="hide">隠す（押すと表示）</option></select></div>
-      <div class="setrow"><label for="st-fs">本文の文字の大きさ</label><input type="range" id="st-fs" min="14" max="22" step="1"></div>
+      <div class="setrow"><label for="st-fs">本文の文字の大きさ</label><input type="range" id="st-fs" min="14" max="24" step="1"></div>
       <div class="setrow"><label for="st-cs">コプト文字の大きさ</label><select id="st-cs"><option value="1">標準</option><option value="1.18">大</option><option value="1.38">特大</option></select></div>
       <div class="setrow"><label for="st-rs">ルビの大きさ</label><select id="st-rs"><option value="0.88">小</option><option value="1">標準</option><option value="1.2">大</option></select></div>
       <div class="setfoot"><button type="button" class="linkbtn" data-go="apxC">グロスの略号一覧</button><button type="button" class="linkbtn" id="st-reset">初期設定に戻す</button></div>
@@ -589,7 +697,7 @@ html.pres .vbar{display:none}
       <h3 class="h-sec">コース</h3>
       <div class="tracks" id="tracks"><section class="trk" data-track="basic"><header><span class="track-name">基礎編</span><span class="track-range">第1〜12課</span><span class="bar"><i></i></span><span class="track-count">0 / 12 課</span></header><p class="track-desc">文字と発音、冠詞、名詞文、現在・完了・未来、動詞の形、関係節、数詞。</p><div class="lgrid"><button type="button" class="lcard" data-go="l1"><span class="ln">1</span><span class="lt">文字と発音</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l2"><span class="ln">2</span><span class="lt">名詞と冠詞</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l3"><span class="ln">3</span><span class="lt">所有・指示・属格</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l4"><span class="ln">4</span><span class="lt">名詞文と代名詞</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l5"><span class="ln">5</span><span class="lt">現在形と状態形</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l6"><span class="ln">6</span><span class="lt">前置詞と接尾代名詞</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l7"><span class="ln">7</span><span class="lt">完了形と否定</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l8"><span class="ln">8</span><span class="lt">未来と命令</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l9"><span class="ln">9</span><span class="lt">動詞の形と目的語</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l10"><span class="ln">10</span><span class="lt">関係節</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l11"><span class="ln">11</span><span class="lt">状況節・未完了・習慣</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l12"><span class="ln">12</span><span class="lt">存在・所有・数詞</span><span class="ls"></span></button></div></section><section class="trk" data-track="inter"><header><span class="track-name">中級編</span><span class="track-range">第13〜18課</span><span class="bar"><i></i></span><span class="track-count">0 / 6 課</span></header><p class="track-desc">接続法と時の節、条件と第二時制、使役不定詞と語形成、方言の対照、分裂文と焦点、複合動詞。</p><div class="lgrid"><button type="button" class="lcard" data-go="l13"><span class="ln">13</span><span class="lt">中級 I：接続法と時の節</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l14"><span class="ln">14</span><span class="lt">中級 II：条件と第二時制</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l15"><span class="ln">15</span><span class="lt">中級 III：使役不定詞と語形成</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l16"><span class="ln">16</span><span class="lt">中級 IV：サイード方言とボハイラ方言</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l17"><span class="ln">17</span><span class="lt">中級 V：分裂文と焦点</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l18"><span class="ln">18</span><span class="lt">中級 VI：複合動詞と語形成</span><span class="ls"></span></button></div></section><section class="trk" data-track="reading"><header><span class="track-name">講読編</span><span class="track-range">第19〜24課</span><span class="bar"><i></i></span><span class="track-count">0 / 6 課</span></header><p class="track-desc">主の祈り、ヨハネ 1章、山上の説教、トマス福音書、放蕩息子、愛の賛歌。</p><div class="lgrid"><button type="button" class="lcard" data-go="l19"><span class="ln">19</span><span class="lt">講読 I：主の祈り</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l20"><span class="ln">20</span><span class="lt">講読 II：ヨハネ福音書 1:1–5</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l21"><span class="ln">21</span><span class="lt">講読 III：山上の説教（マタイ 5:3–8 より）</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l22"><span class="ln">22</span><span class="lt">講読 IV：トマス福音書の冒頭</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l23"><span class="ln">23</span><span class="lt">講読 V：放蕩息子（ルカ 15:11–13、17–18、20、24）</span><span class="ls"></span></button><button type="button" class="lcard" data-go="l24"><span class="ln">24</span><span class="lt">講読 VI：愛の賛歌（一コリント 13:4–8、13）</span><span class="ls"></span></button></div></section></div>
       <h3 class="h-sec">画面の見方</h3>
-<div class="guide"><div class="vbar" role="group" aria-label="行の表示"><span class="vb-t">表示</span><button type="button" class="vb" data-k="latin">転写</button><button type="button" class="vb" data-k="kana">カナ</button><button type="button" class="vb" data-k="seg">区切り</button><button type="button" class="vb" data-k="gl">略号グロス</button><button type="button" class="vb" data-k="gp">やさしいグロス</button><button type="button" class="linkbtn vb-h" data-go="apxC">略号一覧</button></div><div class="guide-ex"><div class="igt-l"><span class="copt" lang="cop"><span class="rb g lab"><span class="rbi"><span class="rt" aria-hidden="true"><span class="rl">転写</span><span class="rk">カナ</span></span><span class="rw"><span class="w0"><small>本文</small></span><span class="w1"><small>本文（区切り）</small></span></span></span><span class="gl">略号グロス</span><span class="gp">やさしいグロス</span></span> <span class="rb g"><span class="rbi"><span class="rt" aria-hidden="true"><span class="rl">tipisteue</span><span class="rk">ティ・ピ<i class="kc">ス</i>テウエ</span></span><span class="rw"><span class="w0">ϯⲡⲓⲥⲧⲉⲩⲉ</span><span class="w1">ϯ-ⲡⲓⲥⲧⲉⲩⲉ</span></span></span><span class="gl">1<i class="sc">sg</i>-信じる</span><span class="gp">私-信じる</span></span> <span class="rb g"><span class="rbi"><span class="rt" aria-hidden="true"><span class="rl">epnoute</span><span class="rk">エ・<i class="kc">プ</i>・ヌーテ</span></span><span class="rw"><span class="w0">ⲉⲡⲛⲟⲩⲧⲉ</span><span class="w1">ⲉ-ⲡ-ⲛⲟⲩⲧⲉ</span></span></span><span class="gl"><i class="sc">all</i>-<i class="sc">def</i>.<i class="sc">m</i>-神</span><span class="gp">へ-その-神</span></span></span></div><div class="igt-t"><b>訳</b>「私は神を信じる」</div></div><ul><li>例文と講読本文では、語ごとに「読み・本文・グロス」を縦に並べ、その下に訳を置いています。</li><li>上の「表示」のボタンで、行を一つずつ出したり消したりできます。同じボタンが各課の上にもあります。</li><li>説明文や表の中のコプト語（点線の下線つき）は、押すと分析が出ます。略号の意味もそこに出ます。</li><li>講読本文は節ごとに区切り、その節の訳をすぐ下に置いています。訳を隠して読む練習は「表示設定」でできます。</li><li>クイズは 1〜4 の数字キーでも答えられます。</li></ul></div>
+<div class="guide"><div class="vbar" role="group" aria-label="行の表示"><span class="vb-t">表示</span><button type="button" class="vb" data-k="latin">転写</button><button type="button" class="vb" data-k="kana">カナ</button><button type="button" class="vb" data-k="seg">区切り</button><button type="button" class="vb" data-k="gl">略号グロス</button><button type="button" class="vb" data-k="gp">やさしいグロス</button><button type="button" class="linkbtn vb-h" data-go="apxC">略号一覧</button></div><div class="guide-ex"><div class="igt-l"><span class="copt" lang="cop"><span class="rb g lab"><span class="rbi"><span class="rt" aria-hidden="true"><span class="rl">転写</span><span class="rk">カナ</span></span><span class="rw"><span class="w0"><small>本文</small></span><span class="w1"><small>本文（区切り）</small></span></span></span><span class="gl">略号グロス</span><span class="gp">やさしいグロス</span></span> <span class="rb g"><span class="rbi"><span class="rt" aria-hidden="true"><span class="rl">tipisteue</span><span class="rk">ティ・ピ<i class="kc">ス</i>テウエ</span></span><span class="rw"><span class="w0">ϯⲡⲓⲥⲧⲉⲩⲉ</span><span class="w1">ϯ-ⲡⲓⲥⲧⲉⲩⲉ</span></span></span><span class="gl">1<i class="sc">sg</i>-信じる</span><span class="gp">私-信じる</span></span> <span class="rb g"><span class="rbi"><span class="rt" aria-hidden="true"><span class="rl">epnoute</span><span class="rk">エ・<i class="kc">プ</i>・ヌーテ</span></span><span class="rw"><span class="w0">ⲉⲡⲛⲟⲩⲧⲉ</span><span class="w1">ⲉ-ⲡ-ⲛⲟⲩⲧⲉ</span></span></span><span class="gl"><i class="sc">all</i>-<i class="sc">def</i>.<i class="sc">m</i>-神</span><span class="gp">へ-その-神</span></span></span></div><div class="igt-t"><b>訳</b>「私は神を信じる」</div></div><ul><li>例文と講読本文では、語ごとに「読み・本文・グロス」を縦に並べ、その下に訳を置いています。</li><li>上の「表示」のボタンで、行を一つずつ出したり消したりできます。同じボタンが各課の上にもあります。</li><li>説明文の中のコプト語には、上にカナの読みだけを小さく添えています。点線の下線つきの語は、押すと分析（区切り・転写・グロス・略号の意味）が出ます。</li><li>講読本文は節ごとに区切り、その節の訳をすぐ下に置いています。訳を隠して読む練習は「表示設定」でできます。</li><li>クイズは 1〜4 の数字キーでも答えられます。</li></ul></div>
       <h3 class="h-sec">復習ツール</h3>
       <div class="tools">
         <button type="button" class="track" data-go="cards"><span class="track-name">フラッシュカード</span><span class="track-desc">各課の語彙 122 語。コプト語を見て意味と転写を答える。覚えた語は記録されます。</span><span class="track-count" id="known-count">覚えた語 0 / 122</span></button>
@@ -8803,13 +8911,14 @@ html.pres .vbar{display:none}
 </div>
 <script id="data" type="application/json">{"meta": [{"id": "intro", "n": 0, "eb": "序", "title": "はじめに", "track": "intro", "ex": 0, "quiz": []}, {"id": "l1", "n": 1, "eb": "第1課", "title": "文字と発音", "track": "basic", "ex": 2, "quiz": [{"h": "ⲣⲱⲙⲉ", "r": "人、人間", "m": "rôme　ローメ", "a": ""}, {"h": "ⲛⲟⲩⲧⲉ", "r": "神", "m": "noute　ヌーテ", "a": ""}, {"h": "ϫⲟⲉⲓⲥ", "r": "主", "m": "čoeis　ジョイス", "a": ""}, {"h": "ⲉⲓⲱⲧ", "r": "父", "m": "eiôt　ヨート", "a": ""}, {"h": "ⲙⲁⲁⲩ", "r": "母", "m": "maau　マアウ", "a": ""}, {"h": "ϣⲏⲣⲉ", "r": "息子、子", "m": "šêre　シェーレ", "a": ""}, {"h": "ⲣⲁⲛ", "r": "名", "m": "ran　ラン", "a": ""}, {"h": "ⲏⲓ", "r": "家", "m": "êi　エーイ", "a": ""}, {"h": "ⲁⲩⲱ", "r": "そして", "m": "auô　アウオー", "a": ""}, {"h": "ϩⲛ̄", "r": "〜の中に", "m": "hən　ヘン", "a": ""}]}, {"id": "l2", "n": 2, "eb": "第2課", "title": "名詞と冠詞", "track": "basic", "ex": 2, "quiz": [{"h": "ⲥϩⲓⲙⲉ", "r": "女、妻", "m": "shime　スヒメ", "a": ""}, {"h": "ⲡⲉ", "r": "天", "m": "pe　ペ", "a": ""}, {"h": "ⲕⲁϩ", "r": "地、土地", "m": "kah　カハ", "a": ""}, {"h": "ⲡⲟⲗⲓⲥ", "r": "町", "m": "polis　ポリス", "a": ""}, {"h": "ϩⲟⲟⲩ", "r": "日", "m": "hoou　ホオウ", "a": ""}, {"h": "ⲣ̄ⲣⲟ", "r": "王", "m": "ərro　エルロ", "a": ""}, {"h": "ϣⲁϫⲉ", "r": "言葉", "m": "šače　シャジェ", "a": ""}, {"h": "ⲥⲟⲛ", "r": "兄弟", "m": "son　ソン", "a": ""}, {"h": "ⲥⲱⲛⲉ", "r": "姉妹", "m": "sône　ソーネ", "a": ""}, {"h": "ⲙⲛ̄", "r": "〜と", "m": "mən　メン", "a": ""}]}, {"id": "l3", "n": 3, "eb": "第3課", "title": "所有・指示・属格", "track": "basic", "ex": 2, "quiz": [{"h": "ⲡⲁⲓ", "r": "これ（男）", "m": "pai　パイ", "a": ""}, {"h": "ⲧⲁⲓ", "r": "これ（女）", "m": "tai　タイ", "a": ""}, {"h": "ⲛⲁⲓ", "r": "これら", "m": "nai　ナイ", "a": ""}, {"h": "ϩⲏⲧ", "r": "心", "m": "hêt　ヘート", "a": ""}, {"h": "ϭⲓϫ", "r": "手", "m": "kʸič　キジ", "a": ""}, {"h": "ϩⲱⲃ", "r": "仕事、物事", "m": "hôb　ホーヴ", "a": ""}, {"h": "ⲛⲟⲃⲉ", "r": "罪", "m": "nobe　ノヴェ", "a": ""}, {"h": "ⲟⲩⲟⲉⲓⲛ", "r": "光", "m": "ouoein　ウオイン", "a": ""}]}, {"id": "l4", "n": 4, "eb": "第4課", "title": "名詞文と代名詞", "track": "basic", "ex": 2, "quiz": [{"h": "ⲁⲛⲟⲕ", "r": "私", "m": "anok　アノク", "a": ""}, {"h": "ⲛ̄ⲧⲟⲕ", "r": "あなた（男）", "m": "əntok　エントク", "a": ""}, {"h": "ⲛ̄ⲧⲟϥ", "r": "彼", "m": "əntof　エントフ", "a": ""}, {"h": "ⲟⲉⲓⲕ", "r": "パン", "m": "oeik　オイク", "a": ""}, {"h": "ⲱⲛϩ", "r": "命、生きる", "m": "ônh　オーンホ", "a": ""}, {"h": "ⲥⲁϩ", "r": "教師、書記", "m": "sah　サハ", "a": ""}, {"h": "ⲛⲟϭ", "r": "大きい、偉大な", "m": "nokʸ　ノキ", "a": ""}, {"h": "ⲕⲟⲥⲙⲟⲥ", "r": "世、世界", "m": "kosmos　コスモス", "a": ""}]}, {"id": "l5", "n": 5, "eb": "第5課", "title": "現在形と状態形", "track": "basic", "ex": 2, "quiz": [{"h": "ⲥⲱⲧⲙ̄", "r": "聞く", "m": "sôtəm　ソーテム", "a": ""}, {"h": "ⲛⲁⲩ", "r": "見る", "m": "nau　ナウ", "a": ""}, {"h": "ϣⲁϫⲉ", "r": "話す", "m": "šače　シャジェ", "a": ""}, {"h": "ϩⲙⲟⲟⲥ", "r": "座る", "m": "hmoos　フモオス", "a": ""}, {"h": "ⲡⲓⲥⲧⲉⲩⲉ", "r": "信じる", "m": "pisteue　ピステウエ", "a": ""}, {"h": "ⲕⲱⲧ", "r": "建てる", "m": "kôt　コート", "a": ""}, {"h": "ⲥϩⲁⲓ", "r": "書く", "m": "shai　スハイ", "a": ""}, {"h": "ⲉⲓⲙⲉ", "r": "知る", "m": "eime　イメ", "a": ""}]}, {"id": "l6", "n": 6, "eb": "第6課", "title": "前置詞と接尾代名詞", "track": "basic", "ex": 2, "quiz": [{"h": "ⲉⲃⲟⲗ", "r": "外へ", "m": "ebol　エヴォル", "a": ""}, {"h": "ⲉϩⲟⲩⲛ", "r": "中へ", "m": "ehoun　エフーン", "a": ""}, {"h": "ⲉⲧⲃⲉ", "r": "〜のゆえに", "m": "etbe　エトヴェ", "a": ""}, {"h": "ϩⲓϫⲛ̄", "r": "〜の上に", "m": "hičən　ヒジェン", "a": ""}, {"h": "ⲟⲩⲏϩ", "r": "従う、ついて行く（状態形）", "m": "ouêh　ウェーヘ", "a": ""}, {"h": "ⲙⲟⲟϣⲉ", "r": "歩く", "m": "mooše　モオシェ", "a": ""}, {"h": "ⲃⲱⲕ", "r": "行く", "m": "bôk　ヴォーク", "a": ""}, {"h": "ⲉⲓ", "r": "来る", "m": "ei　イ", "a": ""}]}, {"id": "l7", "n": 7, "eb": "第7課", "title": "完了形と否定", "track": "basic", "ex": 2, "quiz": [{"h": "ⲡⲉϫⲉ", "r": "〜は言った", "m": "peče　ペジェ", "a": ""}, {"h": "ϫⲉ", "r": "〜と（引用）", "m": "če　ジェ", "a": ""}, {"h": "ⲇⲉ", "r": "さて、しかし", "m": "de　デ", "a": ""}, {"h": "ⲛ̄ϭⲓ", "r": "後置主語の印", "m": "ənkʸi　エンキ", "a": ""}, {"h": "ⲟⲩⲱϣⲃ̄", "r": "答える", "m": "ouôšəb　ウオーシェヴ", "a": ""}, {"h": "ϫⲱ", "r": "言う", "m": "čô　ジョー", "a": ""}, {"h": "ϯ", "r": "与える", "m": "ti　ティ", "a": ""}, {"h": "ϫⲓ", "r": "受け取る、取る", "m": "či　ジ", "a": ""}]}, {"id": "l8", "n": 8, "eb": "第8課", "title": "未来と命令", "track": "basic", "ex": 2, "quiz": [{"h": "ⲙⲉ", "r": "愛する", "m": "me　メ", "a": ""}, {"h": "ϣⲗⲏⲗ", "r": "祈る", "m": "šlêl　シュレール", "a": ""}, {"h": "ϩⲟⲧⲉ", "r": "恐れ", "m": "hote　ホテ", "a": ""}, {"h": "ⲁⲙⲟⲩ", "r": "来い", "m": "amou　アムー", "a": ""}, {"h": "ⲟⲩⲱϣ", "r": "望む、望み", "m": "ouôš　ウオーシュ", "a": ""}, {"h": "ⲣⲁϣⲉ", "r": "喜ぶ、喜び", "m": "raše　ラシェ", "a": ""}, {"h": "ϩⲱⲧⲃ̄", "r": "殺す", "m": "hôtəb　ホーテヴ", "a": ""}, {"h": "ⲧⲱⲟⲩⲛ", "r": "起きる、立ち上がる", "m": "tôoun　トーウン", "a": ""}]}, {"id": "l9", "n": 9, "eb": "第9課", "title": "動詞の形と目的語", "track": "basic", "ex": 2, "quiz": [{"h": "ⲉⲓⲣⲉ", "r": "する、作る", "m": "eire　イレ", "a": ""}, {"h": "ⲙⲓⲥⲉ", "r": "産む", "m": "mise　ミセ", "a": ""}, {"h": "ϫⲡⲟ", "r": "生む、得る", "m": "čpo　ジポ", "a": ""}, {"h": "ⲕⲱ", "r": "置く、残す", "m": "kô　コー", "a": ""}, {"h": "ϭⲓⲛⲉ", "r": "見つける", "m": "kʸine　キネ", "a": ""}, {"h": "ϣⲓⲛⲉ", "r": "尋ねる、探す", "m": "šine　シネ", "a": ""}, {"h": "ⲧⲁⲙⲟ", "r": "知らせる", "m": "tamo　タモ", "a": ""}, {"h": "ⲧⲁⲙⲓⲟ", "r": "創る、作る", "m": "tamio　タミオ", "a": ""}]}, {"id": "l10", "n": 10, "eb": "第10課", "title": "関係節", "track": "basic", "ex": 2, "quiz": [{"h": "ⲟⲩⲁⲁⲃ", "r": "聖い（状態形）", "m": "ouaab　ワアヴ", "a": ""}, {"h": "ⲡⲛⲉⲩⲙⲁ", "r": "霊", "m": "pneuma　プネウマ", "a": ""}, {"h": "ϩⲟⲟⲩ", "r": "悪い（状態形）", "m": "hoou　ホオウ", "a": ""}, {"h": "ⲟⲛϩ", "r": "生きている（状態形）", "m": "onh　オンホ", "a": ""}, {"h": "ⲙⲟⲩ", "r": "死ぬ、死", "m": "mou　ムー", "a": ""}, {"h": "ⲙⲉ", "r": "真理", "m": "me　メ", "a": ""}]}, {"id": "l11", "n": 11, "eb": "第11課", "title": "状況節・未完了・習慣", "track": "basic", "ex": 2, "quiz": [{"h": "ⲙ̄ⲙⲏⲛⲉ", "r": "毎日", "m": "əmmêne　エンメーネ", "a": ""}, {"h": "ⲣⲓⲙⲉ", "r": "泣く", "m": "rime　リメ", "a": ""}, {"h": "ⲥⲙⲟⲩ", "r": "祝福する、賛美する", "m": "smou　スムー", "a": ""}, {"h": "ⲧⲥⲁⲃⲟ", "r": "教える", "m": "tsabo　トサヴォ", "a": ""}, {"h": "ⲟⲩⲟⲉⲓϣ", "r": "時", "m": "ouoeiš　ウオイシュ", "a": ""}, {"h": "ⲛⲓⲙ", "r": "すべての、誰", "m": "nim　ニム", "a": ""}]}, {"id": "l12", "n": 12, "eb": "第12課", "title": "存在・所有・数詞", "track": "basic", "ex": 2, "quiz": [{"h": "ⲙⲟⲟⲩ", "r": "水", "m": "moou　モオウ", "a": ""}, {"h": "ⲙⲁⲑⲏⲧⲏⲥ", "r": "弟子", "m": "mathêtês　マトヘーテース", "a": ""}, {"h": "ⲗⲁⲁⲩ", "r": "何か、誰か", "m": "laau　ラアウ", "a": ""}, {"h": "ⲟⲩⲁ", "r": "一、一人", "m": "oua　ワ", "a": ""}, {"h": "ⲥⲛⲁⲩ", "r": "二", "m": "snau　スナウ", "a": ""}, {"h": "ϣⲟⲙⲛ̄ⲧ", "r": "三", "m": "šomənt　ショメント", "a": ""}, {"h": "ⲙⲏⲧ", "r": "十", "m": "mêt　メート", "a": ""}]}, {"id": "l13", "n": 13, "eb": "第13課", "title": "中級 I：接続法と時の節", "track": "inter", "ex": 2, "quiz": [{"h": "ϫⲉⲕⲁⲁⲥ", "r": "〜するために", "m": "čekaas　ジェカアス", "a": ""}, {"h": "ⲟⲩⲛⲟⲩ", "r": "時、時刻", "m": "ounou　ウーヌー", "a": ""}, {"h": "ⲧⲉⲛⲟⲩ", "r": "今", "m": "tenou　テヌー", "a": ""}, {"h": "ⲟⲛ", "r": "また、再び", "m": "on　オン", "a": ""}, {"h": "ϩⲟⲧⲁⲛ", "r": "〜するとき", "m": "hotan　ホタン", "a": ""}, {"h": "ⲧⲟⲧⲉ", "r": "その時", "m": "tote　トテ", "a": ""}]}, {"id": "l14", "n": 14, "eb": "第14課", "title": "中級 II：条件と第二時制", "track": "inter", "ex": 2, "quiz": [{"h": "ⲉϣϫⲉ", "r": "もし〜なら", "m": "ešče　エシュジェ", "a": ""}, {"h": "ⲉϣⲱⲡⲉ", "r": "もし", "m": "ešôpe　エショーペ", "a": ""}, {"h": "ⲧⲱⲛ", "r": "どこ", "m": "tôn　トーン", "a": ""}, {"h": "ⲟⲩ", "r": "何", "m": "ou　ウー", "a": ""}, {"h": "ⲁϣ", "r": "どの", "m": "aš　アシュ", "a": ""}, {"h": "ⲙⲁ", "r": "場所", "m": "ma　マ", "a": ""}]}, {"id": "l15", "n": 15, "eb": "第15課", "title": "中級 III：使役不定詞と語形成", "track": "inter", "ex": 2, "quiz": [{"h": "ⲥⲃⲱ", "r": "教え", "m": "sbô　スヴォー", "a": ""}, {"h": "ϩⲙⲟⲧ", "r": "恵み、感謝", "m": "hmot　フモト", "a": ""}, {"h": "ⲕⲁⲕⲉ", "r": "闇", "m": "kake　カケ", "a": ""}, {"h": "ϩⲁⲡ", "r": "裁き", "m": "hap　ハプ", "a": ""}, {"h": "ⲕⲏⲙⲉ", "r": "エジプト", "m": "kême　ケーメ", "a": ""}, {"h": "ⲙⲛ̄ⲛ̄ⲥⲁ", "r": "〜の後に", "m": "mənənsa　メネンサ", "a": ""}]}, {"id": "l16", "n": 16, "eb": "第16課", "title": "中級 IV：サイード方言とボハイラ方言", "track": "inter", "ex": 2, "quiz": [{"h": "ϩⲟⲩⲉⲓⲧⲉ", "r": "初め", "m": "houeite　フウィテ", "a": ""}, {"h": "ϣⲟⲟⲡ", "r": "ある（状態形）", "m": "šoop　ショオプ", "a": ""}, {"h": "ϣⲱⲡⲉ", "r": "なる、起こる", "m": "šôpe　ショーペ", "a": ""}, {"h": "ⲧⲏⲣϥ̄", "r": "全体", "m": "têrəf　テーレフ", "a": ""}]}, {"id": "l17", "n": 17, "eb": "第17課", "title": "中級 V：分裂文と焦点", "track": "inter", "ex": 2, "quiz": [{"h": "ⲟⲩⲏϩ", "r": "住んでいる、泊まっている（状態形）", "m": "ouêh　ウェーヘ", "a": ""}, {"h": "ϫⲱϩ", "r": "触れる", "m": "čôh　ジョーホ", "a": ""}, {"h": "ⲧⲛⲁⲩ", "r": "いつ", "m": "tnau　トナウ", "a": ""}, {"h": "ⲇⲓⲁⲕⲟⲛⲉⲓ", "r": "仕える", "m": "diakonei　ディアコネイ", "a": ""}, {"h": "ⲁⲗⲗⲁ", "r": "しかし、〜ではなくて", "m": "alla　アルラ", "a": ""}, {"h": "ⲥⲟⲟⲩⲛ", "r": "知る", "m": "sooun　ソオウン", "a": ""}]}, {"id": "l18", "n": 18, "eb": "第18課", "title": "中級 VI：複合動詞と語形成", "track": "inter", "ex": 2, "quiz": [{"h": "ⲛⲟⲃⲉ", "r": "罪", "m": "nobe　ノヴェ", "a": ""}, {"h": "ϩⲟⲧⲉ", "r": "恐れ", "m": "hote　ホテ", "a": ""}, {"h": "ⲥⲃⲱ", "r": "教え", "m": "sbô　スヴォー", "a": ""}, {"h": "ⲣⲟⲟⲩϣ", "r": "心配", "m": "roouš　ロオウシュ", "a": ""}, {"h": "ϩⲙⲟⲧ", "r": "恵み", "m": "hmot　フモト", "a": ""}, {"h": "ⲃⲉⲕⲉ", "r": "賃金", "m": "beke　ヴェケ", "a": ""}, {"h": "ϣⲛⲁ", "r": "放蕩な", "m": "šna　シュナ", "a": ""}]}, {"id": "l19", "n": 19, "eb": "第19課", "title": "講読 I：主の祈り", "track": "reading", "ex": 2, "quiz": []}, {"id": "l20", "n": 20, "eb": "第20課", "title": "講読 II：ヨハネ福音書 1:1–5", "track": "reading", "ex": 2, "quiz": []}, {"id": "l21", "n": 21, "eb": "第21課", "title": "講読 III：山上の説教（マタイ 5:3–8 より）", "track": "reading", "ex": 2, "quiz": []}, {"id": "l22", "n": 22, "eb": "第22課", "title": "講読 IV：トマス福音書の冒頭", "track": "reading", "ex": 2, "quiz": []}, {"id": "l23", "n": 23, "eb": "第23課", "title": "講読 V：放蕩息子（ルカ 15:11–13、17–18、20、24）", "track": "reading", "ex": 2, "quiz": []}, {"id": "l24", "n": 24, "eb": "第24課", "title": "講読 VI：愛の賛歌（一コリント 13:4–8、13）", "track": "reading", "ex": 2, "quiz": []}, {"id": "gr1", "n": 0, "eb": "文法 1", "title": "音と文字", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr2", "n": 0, "eb": "文法 2", "title": "名詞", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr3", "n": 0, "eb": "文法 3", "title": "冠詞と限定の語", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr4", "n": 0, "eb": "文法 4", "title": "代名詞", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr5", "n": 0, "eb": "文法 5", "title": "数詞", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr6", "n": 0, "eb": "文法 6", "title": "前置詞", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr7", "n": 0, "eb": "文法 7", "title": "修飾と名詞句", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr8", "n": 0, "eb": "文法 8", "title": "動詞の形", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr9", "n": 0, "eb": "文法 9", "title": "活用の体系", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr10", "n": 0, "eb": "文法 10", "title": "文の型", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr11", "n": 0, "eb": "文法 11", "title": "否定と疑問", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr12", "n": 0, "eb": "文法 12", "title": "従属節", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr13", "n": 0, "eb": "文法 13", "title": "小辞と接続詞", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr14", "n": 0, "eb": "文法 14", "title": "語形成と借用語", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr15", "n": 0, "eb": "文法 15", "title": "名詞文の詳説", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr16", "n": 0, "eb": "文法 16", "title": "分裂文・焦点・話題化", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr17", "n": 0, "eb": "文法 17", "title": "提示の文と非人称の述語", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr18", "n": 0, "eb": "文法 18", "title": "引用と内容の節", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr19", "n": 0, "eb": "文法 19", "title": "受け身・再帰・使役", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr20", "n": 0, "eb": "文法 20", "title": "比較と程度", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr21", "n": 0, "eb": "文法 21", "title": "動詞に付く補助の要素", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr22", "n": 0, "eb": "文法 22", "title": "ギリシア語からの借用語", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr23", "n": 0, "eb": "文法 23", "title": "用語の解説", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr24", "n": 0, "eb": "文法 24", "title": "時と場所の表現", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr25", "n": 0, "eb": "文法 25", "title": "数と量の表現", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr26", "n": 0, "eb": "文法 26", "title": "呼びかけ・応答・感嘆", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr27", "n": 0, "eb": "文法 27", "title": "条件文の詳説", "track": "gram", "ex": 0, "quiz": []}, {"id": "gr28", "n": 0, "eb": "文法 28", "title": "左方転移と右方転移", "track": "gram", "ex": 0, "quiz": []}, {"id": "apxA", "n": 0, "eb": "付録A", "title": "活用の早見表", "track": "apx", "ex": 0, "quiz": []}, {"id": "apxB", "n": 0, "eb": "付録B", "title": "練習問題解答", "track": "apx", "ex": 0, "quiz": []}, {"id": "apxC", "n": 0, "eb": "付録C", "title": "グロスの略号", "track": "apx", "ex": 0, "quiz": []}, {"id": "apxD", "n": 0, "eb": "付録D", "title": "例文の出典", "track": "apx", "ex": 0, "quiz": []}, {"id": "apxE", "n": 0, "eb": "付録E", "title": "統語論・意味論・語用論のまとめ", "track": "apx", "ex": 0, "quiz": []}, {"id": "apxF", "n": 0, "eb": "付録F", "title": "他の文法書との対応", "track": "apx", "ex": 0, "quiz": []}, {"id": "bib", "n": 0, "eb": "文献", "title": "参考文献と次に読むもの", "track": "apx", "ex": 0, "quiz": []}], "deck": [{"h": "ⲣⲱⲙⲉ", "r": "人、人間", "m": "rôme　ローメ", "a": "", "c": "第1課"}, {"h": "ⲛⲟⲩⲧⲉ", "r": "神", "m": "noute　ヌーテ", "a": "", "c": "第1課"}, {"h": "ϫⲟⲉⲓⲥ", "r": "主", "m": "čoeis　ジョイス", "a": "", "c": "第1課"}, {"h": "ⲉⲓⲱⲧ", "r": "父", "m": "eiôt　ヨート", "a": "", "c": "第1課"}, {"h": "ⲙⲁⲁⲩ", "r": "母", "m": "maau　マアウ", "a": "", "c": "第1課"}, {"h": "ϣⲏⲣⲉ", "r": "息子、子", "m": "šêre　シェーレ", "a": "", "c": "第1課"}, {"h": "ⲣⲁⲛ", "r": "名", "m": "ran　ラン", "a": "", "c": "第1課"}, {"h": "ⲏⲓ", "r": "家", "m": "êi　エーイ", "a": "", "c": "第1課"}, {"h": "ⲁⲩⲱ", "r": "そして", "m": "auô　アウオー", "a": "", "c": "第1課"}, {"h": "ϩⲛ̄", "r": "〜の中に", "m": "hən　ヘン", "a": "", "c": "第1課"}, {"h": "ⲥϩⲓⲙⲉ", "r": "女、妻", "m": "shime　スヒメ", "a": "", "c": "第2課"}, {"h": "ⲡⲉ", "r": "天", "m": "pe　ペ", "a": "", "c": "第2課"}, {"h": "ⲕⲁϩ", "r": "地、土地", "m": "kah　カハ", "a": "", "c": "第2課"}, {"h": "ⲡⲟⲗⲓⲥ", "r": "町", "m": "polis　ポリス", "a": "", "c": "第2課"}, {"h": "ϩⲟⲟⲩ", "r": "日", "m": "hoou　ホオウ", "a": "", "c": "第2課"}, {"h": "ⲣ̄ⲣⲟ", "r": "王", "m": "ərro　エルロ", "a": "", "c": "第2課"}, {"h": "ϣⲁϫⲉ", "r": "言葉", "m": "šače　シャジェ", "a": "", "c": "第2課"}, {"h": "ⲥⲟⲛ", "r": "兄弟", "m": "son　ソン", "a": "", "c": "第2課"}, {"h": "ⲥⲱⲛⲉ", "r": "姉妹", "m": "sône　ソーネ", "a": "", "c": "第2課"}, {"h": "ⲙⲛ̄", "r": "〜と", "m": "mən　メン", "a": "", "c": "第2課"}, {"h": "ⲡⲁⲓ", "r": "これ（男）", "m": "pai　パイ", "a": "", "c": "第3課"}, {"h": "ⲧⲁⲓ", "r": "これ（女）", "m": "tai　タイ", "a": "", "c": "第3課"}, {"h": "ⲛⲁⲓ", "r": "これら", "m": "nai　ナイ", "a": "", "c": "第3課"}, {"h": "ϩⲏⲧ", "r": "心", "m": "hêt　ヘート", "a": "", "c": "第3課"}, {"h": "ϭⲓϫ", "r": "手", "m": "kʸič　キジ", "a": "", "c": "第3課"}, {"h": "ϩⲱⲃ", "r": "仕事、物事", "m": "hôb　ホーヴ", "a": "", "c": "第3課"}, {"h": "ⲛⲟⲃⲉ", "r": "罪", "m": "nobe　ノヴェ", "a": "", "c": "第3課"}, {"h": "ⲟⲩⲟⲉⲓⲛ", "r": "光", "m": "ouoein　ウオイン", "a": "", "c": "第3課"}, {"h": "ⲁⲛⲟⲕ", "r": "私", "m": "anok　アノク", "a": "", "c": "第4課"}, {"h": "ⲛ̄ⲧⲟⲕ", "r": "あなた（男）", "m": "əntok　エントク", "a": "", "c": "第4課"}, {"h": "ⲛ̄ⲧⲟϥ", "r": "彼", "m": "əntof　エントフ", "a": "", "c": "第4課"}, {"h": "ⲟⲉⲓⲕ", "r": "パン", "m": "oeik　オイク", "a": "", "c": "第4課"}, {"h": "ⲱⲛϩ", "r": "命、生きる", "m": "ônh　オーンホ", "a": "", "c": "第4課"}, {"h": "ⲥⲁϩ", "r": "教師、書記", "m": "sah　サハ", "a": "", "c": "第4課"}, {"h": "ⲛⲟϭ", "r": "大きい、偉大な", "m": "nokʸ　ノキ", "a": "", "c": "第4課"}, {"h": "ⲕⲟⲥⲙⲟⲥ", "r": "世、世界", "m": "kosmos　コスモス", "a": "", "c": "第4課"}, {"h": "ⲥⲱⲧⲙ̄", "r": "聞く", "m": "sôtəm　ソーテム", "a": "", "c": "第5課"}, {"h": "ⲛⲁⲩ", "r": "見る", "m": "nau　ナウ", "a": "", "c": "第5課"}, {"h": "ϩⲙⲟⲟⲥ", "r": "座る", "m": "hmoos　フモオス", "a": "", "c": "第5課"}, {"h": "ⲡⲓⲥⲧⲉⲩⲉ", "r": "信じる", "m": "pisteue　ピステウエ", "a": "", "c": "第5課"}, {"h": "ⲕⲱⲧ", "r": "建てる", "m": "kôt　コート", "a": "", "c": "第5課"}, {"h": "ⲥϩⲁⲓ", "r": "書く", "m": "shai　スハイ", "a": "", "c": "第5課"}, {"h": "ⲉⲓⲙⲉ", "r": "知る", "m": "eime　イメ", "a": "", "c": "第5課"}, {"h": "ⲉⲃⲟⲗ", "r": "外へ", "m": "ebol　エヴォル", "a": "", "c": "第6課"}, {"h": "ⲉϩⲟⲩⲛ", "r": "中へ", "m": "ehoun　エフーン", "a": "", "c": "第6課"}, {"h": "ⲉⲧⲃⲉ", "r": "〜のゆえに", "m": "etbe　エトヴェ", "a": "", "c": "第6課"}, {"h": "ϩⲓϫⲛ̄", "r": "〜の上に", "m": "hičən　ヒジェン", "a": "", "c": "第6課"}, {"h": "ⲟⲩⲏϩ", "r": "従う、ついて行く（状態形）", "m": "ouêh　ウェーヘ", "a": "", "c": "第6課"}, {"h": "ⲙⲟⲟϣⲉ", "r": "歩く", "m": "mooše　モオシェ", "a": "", "c": "第6課"}, {"h": "ⲃⲱⲕ", "r": "行く", "m": "bôk　ヴォーク", "a": "", "c": "第6課"}, {"h": "ⲉⲓ", "r": "来る", "m": "ei　イ", "a": "", "c": "第6課"}, {"h": "ⲡⲉϫⲉ", "r": "〜は言った", "m": "peče　ペジェ", "a": "", "c": "第7課"}, {"h": "ϫⲉ", "r": "〜と（引用）", "m": "če　ジェ", "a": "", "c": "第7課"}, {"h": "ⲇⲉ", "r": "さて、しかし", "m": "de　デ", "a": "", "c": "第7課"}, {"h": "ⲛ̄ϭⲓ", "r": "後置主語の印", "m": "ənkʸi　エンキ", "a": "", "c": "第7課"}, {"h": "ⲟⲩⲱϣⲃ̄", "r": "答える", "m": "ouôšəb　ウオーシェヴ", "a": "", "c": "第7課"}, {"h": "ϫⲱ", "r": "言う", "m": "čô　ジョー", "a": "", "c": "第7課"}, {"h": "ϯ", "r": "与える", "m": "ti　ティ", "a": "", "c": "第7課"}, {"h": "ϫⲓ", "r": "受け取る、取る", "m": "či　ジ", "a": "", "c": "第7課"}, {"h": "ⲙⲉ", "r": "愛する", "m": "me　メ", "a": "", "c": "第8課"}, {"h": "ϣⲗⲏⲗ", "r": "祈る", "m": "šlêl　シュレール", "a": "", "c": "第8課"}, {"h": "ϩⲟⲧⲉ", "r": "恐れ", "m": "hote　ホテ", "a": "", "c": "第8課"}, {"h": "ⲁⲙⲟⲩ", "r": "来い", "m": "amou　アムー", "a": "", "c": "第8課"}, {"h": "ⲟⲩⲱϣ", "r": "望む、望み", "m": "ouôš　ウオーシュ", "a": "", "c": "第8課"}, {"h": "ⲣⲁϣⲉ", "r": "喜ぶ、喜び", "m": "raše　ラシェ", "a": "", "c": "第8課"}, {"h": "ϩⲱⲧⲃ̄", "r": "殺す", "m": "hôtəb　ホーテヴ", "a": "", "c": "第8課"}, {"h": "ⲧⲱⲟⲩⲛ", "r": "起きる、立ち上がる", "m": "tôoun　トーウン", "a": "", "c": "第8課"}, {"h": "ⲉⲓⲣⲉ", "r": "する、作る", "m": "eire　イレ", "a": "", "c": "第9課"}, {"h": "ⲙⲓⲥⲉ", "r": "産む", "m": "mise　ミセ", "a": "", "c": "第9課"}, {"h": "ϫⲡⲟ", "r": "生む、得る", "m": "čpo　ジポ", "a": "", "c": "第9課"}, {"h": "ⲕⲱ", "r": "置く、残す", "m": "kô　コー", "a": "", "c": "第9課"}, {"h": "ϭⲓⲛⲉ", "r": "見つける", "m": "kʸine　キネ", "a": "", "c": "第9課"}, {"h": "ϣⲓⲛⲉ", "r": "尋ねる、探す", "m": "šine　シネ", "a": "", "c": "第9課"}, {"h": "ⲧⲁⲙⲟ", "r": "知らせる", "m": "tamo　タモ", "a": "", "c": "第9課"}, {"h": "ⲧⲁⲙⲓⲟ", "r": "創る、作る", "m": "tamio　タミオ", "a": "", "c": "第9課"}, {"h": "ⲟⲩⲁⲁⲃ", "r": "聖い（状態形）", "m": "ouaab　ワアヴ", "a": "", "c": "第10課"}, {"h": "ⲡⲛⲉⲩⲙⲁ", "r": "霊", "m": "pneuma　プネウマ", "a": "", "c": "第10課"}, {"h": "ⲟⲛϩ", "r": "生きている（状態形）", "m": "onh　オンホ", "a": "", "c": "第10課"}, {"h": "ⲙⲟⲩ", "r": "死ぬ、死", "m": "mou　ムー", "a": "", "c": "第10課"}, {"h": "ⲙ̄ⲙⲏⲛⲉ", "r": "毎日", "m": "əmmêne　エンメーネ", "a": "", "c": "第11課"}, {"h": "ⲣⲓⲙⲉ", "r": "泣く", "m": "rime　リメ", "a": "", "c": "第11課"}, {"h": "ⲥⲙⲟⲩ", "r": "祝福する、賛美する", "m": "smou　スムー", "a": "", "c": "第11課"}, {"h": "ⲧⲥⲁⲃⲟ", "r": "教える", "m": "tsabo　トサヴォ", "a": "", "c": "第11課"}, {"h": "ⲟⲩⲟⲉⲓϣ", "r": "時", "m": "ouoeiš　ウオイシュ", "a": "", "c": "第11課"}, {"h": "ⲛⲓⲙ", "r": "すべての、誰", "m": "nim　ニム", "a": "", "c": "第11課"}, {"h": "ⲙⲟⲟⲩ", "r": "水", "m": "moou　モオウ", "a": "", "c": "第12課"}, {"h": "ⲙⲁⲑⲏⲧⲏⲥ", "r": "弟子", "m": "mathêtês　マトヘーテース", "a": "", "c": "第12課"}, {"h": "ⲗⲁⲁⲩ", "r": "何か、誰か", "m": "laau　ラアウ", "a": "", "c": "第12課"}, {"h": "ⲟⲩⲁ", "r": "一、一人", "m": "oua　ワ", "a": "", "c": "第12課"}, {"h": "ⲥⲛⲁⲩ", "r": "二", "m": "snau　スナウ", "a": "", "c": "第12課"}, {"h": "ϣⲟⲙⲛ̄ⲧ", "r": "三", "m": "šomənt　ショメント", "a": "", "c": "第12課"}, {"h": "ⲙⲏⲧ", "r": "十", "m": "mêt　メート", "a": "", "c": "第12課"}, {"h": "ϫⲉⲕⲁⲁⲥ", "r": "〜するために", "m": "čekaas　ジェカアス", "a": "", "c": "第13課"}, {"h": "ⲟⲩⲛⲟⲩ", "r": "時、時刻", "m": "ounou　ウーヌー", "a": "", "c": "第13課"}, {"h": "ⲧⲉⲛⲟⲩ", "r": "今", "m": "tenou　テヌー", "a": "", "c": "第13課"}, {"h": "ⲟⲛ", "r": "また、再び", "m": "on　オン", "a": "", "c": "第13課"}, {"h": "ϩⲟⲧⲁⲛ", "r": "〜するとき", "m": "hotan　ホタン", "a": "", "c": "第13課"}, {"h": "ⲧⲟⲧⲉ", "r": "その時", "m": "tote　トテ", "a": "", "c": "第13課"}, {"h": "ⲉϣϫⲉ", "r": "もし〜なら", "m": "ešče　エシュジェ", "a": "", "c": "第14課"}, {"h": "ⲉϣⲱⲡⲉ", "r": "もし", "m": "ešôpe　エショーペ", "a": "", "c": "第14課"}, {"h": "ⲧⲱⲛ", "r": "どこ", "m": "tôn　トーン", "a": "", "c": "第14課"}, {"h": "ⲟⲩ", "r": "何", "m": "ou　ウー", "a": "", "c": "第14課"}, {"h": "ⲁϣ", "r": "どの", "m": "aš　アシュ", "a": "", "c": "第14課"}, {"h": "ⲙⲁ", "r": "場所", "m": "ma　マ", "a": "", "c": "第14課"}, {"h": "ⲥⲃⲱ", "r": "教え", "m": "sbô　スヴォー", "a": "", "c": "第15課"}, {"h": "ϩⲙⲟⲧ", "r": "恵み、感謝", "m": "hmot　フモト", "a": "", "c": "第15課"}, {"h": "ⲕⲁⲕⲉ", "r": "闇", "m": "kake　カケ", "a": "", "c": "第15課"}, {"h": "ϩⲁⲡ", "r": "裁き", "m": "hap　ハプ", "a": "", "c": "第15課"}, {"h": "ⲕⲏⲙⲉ", "r": "エジプト", "m": "kême　ケーメ", "a": "", "c": "第15課"}, {"h": "ⲙⲛ̄ⲛ̄ⲥⲁ", "r": "〜の後に", "m": "mənənsa　メネンサ", "a": "", "c": "第15課"}, {"h": "ϩⲟⲩⲉⲓⲧⲉ", "r": "初め", "m": "houeite　フウィテ", "a": "", "c": "第16課"}, {"h": "ϣⲟⲟⲡ", "r": "ある（状態形）", "m": "šoop　ショオプ", "a": "", "c": "第16課"}, {"h": "ϣⲱⲡⲉ", "r": "なる、起こる", "m": "šôpe　ショーペ", "a": "", "c": "第16課"}, {"h": "ⲧⲏⲣϥ̄", "r": "全体", "m": "têrəf　テーレフ", "a": "", "c": "第16課"}, {"h": "ϫⲱϩ", "r": "触れる", "m": "čôh　ジョーホ", "a": "", "c": "第17課"}, {"h": "ⲧⲛⲁⲩ", "r": "いつ", "m": "tnau　トナウ", "a": "", "c": "第17課"}, {"h": "ⲇⲓⲁⲕⲟⲛⲉⲓ", "r": "仕える", "m": "diakonei　ディアコネイ", "a": "", "c": "第17課"}, {"h": "ⲁⲗⲗⲁ", "r": "しかし、〜ではなくて", "m": "alla　アルラ", "a": "", "c": "第17課"}, {"h": "ⲥⲟⲟⲩⲛ", "r": "知る", "m": "sooun　ソオウン", "a": "", "c": "第17課"}, {"h": "ⲣⲟⲟⲩϣ", "r": "心配", "m": "roouš　ロオウシュ", "a": "", "c": "第18課"}, {"h": "ⲃⲉⲕⲉ", "r": "賃金", "m": "beke　ヴェケ", "a": "", "c": "第18課"}, {"h": "ϣⲛⲁ", "r": "放蕩な", "m": "šna　シュナ", "a": "", "c": "第18課"}], "tracks": [["basic", "基礎編"], ["inter", "中級編"], ["reading", "講読編"]]}</script>
 <script>
-/* RS v2：表示の組み直し（tools/restyle.py が本体スクリプトの前に差し込む）。
+/* RS v3：表示の組み直し（tools/restyle.py が本体スクリプトの前に差し込む）。
    課を開いたときに一度だけ、その課の DOM を次のように組み直す。
    - 太字の見出しで始まる項目 → 見出し＋説明のカード
    - 「コプト語＋「訳」」で始まる項目 → 番号つきの行間グロス例文
    - 説明文の中の「例文「訳」（出典）」→ 独立した例文ブロック
    - 講読本文 → 節ごとの行間グロス＋その節の訳
-   - グロスを並べない場所の語 → 押すと分析が出る */
+   - グロスを並べない場所の語 → 押すと分析が出る
+   - 説明文の中の語 → ルビを行の高さに数えず、その段落の行間を一定にする（.rb.ip と .lh） */
 (function(){
 'use strict';
 function el(tag,cls,txt){var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e}
@@ -8993,6 +9102,15 @@ function readings(root){
 }
 
 /* 5. ハイフンでつないだ語形を行の途中で切らない */
+/* 語のすぐ外に置かれた - と ⸗ は語の側に入れる（ⲛ̄ と - の間で行が切れたり、間が空いたりしないように） */
+function adopt(root){
+  root.querySelectorAll('.copt').forEach(function(c){
+    if(c.dataset.ad||c.closest('blockquote,.fig')) return; c.dataset.ad='1';
+    var p=c.previousSibling, n=c.nextSibling, m;
+    if(p&&p.nodeType===3&&(m=p.data.match(/[-⸗]+$/))&&!/[A-Za-z0-9.]$/.test(p.data.slice(0,-m[0].length))){ p.data=p.data.slice(0,-m[0].length); c.insertBefore(document.createTextNode(m[0]),c.firstChild) }
+    if(n&&n.nodeType===3&&(m=n.data.match(/^[-⸗]+/))){ n.data=n.data.slice(m[0].length); c.appendChild(document.createTextNode(m[0])) }
+  });
+}
 function bound(root){
   root.querySelectorAll('.copt').forEach(function(c){
     if(c.dataset.bg||c.closest('blockquote,.fig')) return; c.dataset.bg='1';
@@ -9016,7 +9134,22 @@ function tables(root){
     if(heads.indexOf('意味')>=0&&heads.indexOf('転写')>=0) tb.querySelectorAll('tbody td:first-child .rb.g').forEach(function(w){
       w.classList.remove('g'); w.querySelectorAll('.gl,.gp,.w1').forEach(function(x){x.remove()});
     });
+    if(heads.indexOf('転写')>=0) tb.classList.add('has-tr');
     tb.querySelectorAll('tbody td:first-child').forEach(function(td){ if(!td.querySelector('.copt')&&td.textContent.trim().length<=9) td.classList.add('nw') });
+  });
+}
+
+/* 5c. 説明文の中の語：ルビを行の高さに数えない（.ip）。その語を含む段落は行間を広げて一定にする（.lh）。
+       例文・講読本文・図・短い表の欄は、これまでどおり語ごとに読みを積む。 */
+function ownLen(e){ var n=e.textContent.replace(/\s+/g,'').length; e.querySelectorAll('.copt').forEach(function(c){n-=c.textContent.replace(/\s+/g,'').length}); return n }
+function proseRuby(root){
+  var cells=[];
+  root.querySelectorAll('.rb').forEach(function(w){
+    if(w.classList.contains('ip')||!w.querySelector('.rt')||w.closest('.igt-l,.igx-l,blockquote,.fig,.guide-ex,.vl')) return;
+    var cell=w.closest('td,th');
+    if(cell){ var i=cells.indexOf(cell); if(i<0){cells.push(cell); cell._rsProse=ownLen(cell)>=10} if(!cell._rsProse) return }
+    w.classList.add('ip');
+    var blk=w.parentNode.closest('p,li,dd,dt,td,th,h3,h4,h5,div,figcaption,summary'); if(blk) blk.classList.add('lh');
   });
 }
 
@@ -9027,13 +9160,25 @@ function vbar(sec){
   var bar=el('div','vbar'); bar.setAttribute('role','group'); bar.setAttribute('aria-label','行の表示'); bar.appendChild(el('span','vb-t','表示'));
   KEYS.forEach(function(k){var b=el('button','vb',k[1]); b.type='button'; b.dataset.k=k[0]; bar.appendChild(b)});
   var h=el('button','linkbtn vb-h','略号一覧'); h.type='button'; h.dataset.go='apxC'; bar.appendChild(h);
-  sec.insertBefore(bar,body); sync();
+  sec.insertBefore(bar,body); sync(); barVis();
+}
+/* いま見えている範囲に読みの付いた語がなければ（クイズなど）、切り替えの帯は出さない */
+function barVis(){
+  var v=document.querySelector('.view:not([hidden])'), bar=v&&v.querySelector(':scope > .vbar'); if(!bar) return;
+  var body=v.querySelector('.lesson-body'), steps=body?body.querySelectorAll(':scope > .step'):[], any=false;
+  if(!steps.length) any=true; else steps.forEach(function(s){ if(!s.hidden&&s.querySelector('.rb')) any=true });
+  bar.hidden=!any;
 }
 function sync(){
   var R=window.__rs; if(!R) return;
   document.querySelectorAll('.vbar .vb').forEach(function(b){b.setAttribute('aria-pressed',String(!!R.S[b.dataset.k]))});
+  var pv=R.S.prose==='both'?'both':'kana', sel=document.getElementById('st-prose');
+  document.documentElement.setAttribute('data-prose',pv); if(sel) sel.value=pv;
 }
 window.__rsSync=sync;
+document.addEventListener('change',function(e){
+  if(e.target&&e.target.id==='st-prose'&&window.__rs){ window.__rs.S.prose=e.target.value; window.__rs.apply() }
+});
 document.addEventListener('click',function(e){
   var b=e.target.closest&&e.target.closest('.vbar .vb'); if(!b||!window.__rs) return;
   var R=window.__rs; R.S[b.dataset.k]=!R.S[b.dataset.k]; R.apply();
@@ -9083,7 +9228,7 @@ if(window.matchMedia&&window.matchMedia('(hover:hover)').matches){
 }
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') hidePop() });
 document.addEventListener('stepchange',function(){
-  hidePop();
+  hidePop(); barVis();
   var t=document.querySelector('.view:not([hidden]) .stab[aria-current="step"]'), box=t&&t.parentNode;
   if(box&&box.scrollWidth>box.clientWidth+4) box.scrollLeft=Math.max(0,t.offsetLeft-box.offsetLeft-(box.clientWidth-t.offsetWidth)/2);
 });
@@ -9103,7 +9248,8 @@ window.__rsEnh=function(sec){
   var body=sec.querySelector('.lesson-body'); if(!body) return;
   try{
     body.querySelectorAll('.step').forEach(function(st){var h=st.querySelector('h3'); if(h&&/この課の要点/.test(h.textContent)) st.classList.add('kp')});
-    flatten(body); points(body); igtItems(body); readings(body); prose(body); tables(body); bound(body); vbar(sec);
+    if(!body.querySelector(':scope > .step')) body.classList.add('sheet');
+    flatten(body); points(body); igtItems(body); readings(body); prose(body); tables(body); adopt(body); bound(body); proseRuby(body); vbar(sec);
   }catch(err){ if(window.console) console.error('rs',err) }
 };
 })();
@@ -9113,7 +9259,7 @@ window.__rsEnh=function(sec){
 var D=JSON.parse(document.getElementById('data').textContent), META=D.meta, DECK=D.deck, TRACKS=D.tracks;
 var LESSONS=META.filter(function(m){return m.n}), ORDER=META.map(function(m){return m.id});
 var byId={}; META.forEach(function(m){byId[m.id]=m});
-var KEY='sahidic-mooc-v1', S={done:{},notes:{},known:{},best:{},last:null,fs:17};
+var KEY='sahidic-mooc-v1', S={done:{},notes:{},known:{},best:{},last:null,fs:18};
 try{var raw=localStorage.getItem(KEY); if(raw){var o=JSON.parse(raw); for(var k in o) S[k]=o[k];}}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 window.__rs={S:S,apply:function(){applySet()}};
@@ -9337,11 +9483,12 @@ $('menu').addEventListener('click',function(){side.classList.add('open'); $('scr
 $('scrim').addEventListener('click',closeSide);
 var qt=null; $('q').addEventListener('input',function(){ var v=this.value.trim(); clearTimeout(qt);
   qt=setTimeout(function(){ if(v.length>=2){ document.querySelectorAll('.view').forEach(function(x){x.hidden=(x.id!=='search')}); current='search'; doSearch(v) } else if(current==='search') show(S.last||'home') },200) });
-var DEF={skin:'parch',gl:true,gp:true,seg:true,kana:true,latin:true,gloss:'all',tr:'show',fs:17,cs:'1',rs:'1'};
+var DEF={skin:'papyrus',gl:true,gp:true,seg:true,kana:true,latin:true,gloss:'all',tr:'show',fs:18,cs:'1',rs:'1',prose:'kana'};
 if(S.ruby && S.kana===undefined){S.kana=(S.ruby==='both'||S.ruby==='kana'); S.latin=(S.ruby==='both'||S.ruby==='latin')}
 if(S.skinv!==3){S.skin='papyrus'; S.skinv=3}
 for(var dk in DEF){ if(S[dk]===undefined||S[dk]===null) S[dk]=DEF[dk] }
 if(S.fs===16) S.fs=17;
+if(S.rsv!==3){ if(S.fs===17) S.fs=18; S.rsv=3 }
 function applySet(){
   var R=document.documentElement;
   R.setAttribute('data-ruby',S.kana&&S.latin?'both':S.kana?'kana':S.latin?'latin':'off');

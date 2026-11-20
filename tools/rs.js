@@ -1,10 +1,11 @@
-/* RS v2：表示の組み直し（tools/restyle.py が本体スクリプトの前に差し込む）。
+/* RS v3：表示の組み直し（tools/restyle.py が本体スクリプトの前に差し込む）。
    課を開いたときに一度だけ、その課の DOM を次のように組み直す。
    - 太字の見出しで始まる項目 → 見出し＋説明のカード
    - 「コプト語＋「訳」」で始まる項目 → 番号つきの行間グロス例文
    - 説明文の中の「例文「訳」（出典）」→ 独立した例文ブロック
    - 講読本文 → 節ごとの行間グロス＋その節の訳
-   - グロスを並べない場所の語 → 押すと分析が出る */
+   - グロスを並べない場所の語 → 押すと分析が出る
+   - 説明文の中の語 → ルビを行の高さに数えず、その段落の行間を一定にする（.rb.ip と .lh） */
 (function(){
 'use strict';
 function el(tag,cls,txt){var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e}
@@ -188,6 +189,15 @@ function readings(root){
 }
 
 /* 5. ハイフンでつないだ語形を行の途中で切らない */
+/* 語のすぐ外に置かれた - と ⸗ は語の側に入れる（ⲛ̄ と - の間で行が切れたり、間が空いたりしないように） */
+function adopt(root){
+  root.querySelectorAll('.copt').forEach(function(c){
+    if(c.dataset.ad||c.closest('blockquote,.fig')) return; c.dataset.ad='1';
+    var p=c.previousSibling, n=c.nextSibling, m;
+    if(p&&p.nodeType===3&&(m=p.data.match(/[-⸗]+$/))&&!/[A-Za-z0-9.]$/.test(p.data.slice(0,-m[0].length))){ p.data=p.data.slice(0,-m[0].length); c.insertBefore(document.createTextNode(m[0]),c.firstChild) }
+    if(n&&n.nodeType===3&&(m=n.data.match(/^[-⸗]+/))){ n.data=n.data.slice(m[0].length); c.appendChild(document.createTextNode(m[0])) }
+  });
+}
 function bound(root){
   root.querySelectorAll('.copt').forEach(function(c){
     if(c.dataset.bg||c.closest('blockquote,.fig')) return; c.dataset.bg='1';
@@ -211,7 +221,22 @@ function tables(root){
     if(heads.indexOf('意味')>=0&&heads.indexOf('転写')>=0) tb.querySelectorAll('tbody td:first-child .rb.g').forEach(function(w){
       w.classList.remove('g'); w.querySelectorAll('.gl,.gp,.w1').forEach(function(x){x.remove()});
     });
+    if(heads.indexOf('転写')>=0) tb.classList.add('has-tr');
     tb.querySelectorAll('tbody td:first-child').forEach(function(td){ if(!td.querySelector('.copt')&&td.textContent.trim().length<=9) td.classList.add('nw') });
+  });
+}
+
+/* 5c. 説明文の中の語：ルビを行の高さに数えない（.ip）。その語を含む段落は行間を広げて一定にする（.lh）。
+       例文・講読本文・図・短い表の欄は、これまでどおり語ごとに読みを積む。 */
+function ownLen(e){ var n=e.textContent.replace(/\s+/g,'').length; e.querySelectorAll('.copt').forEach(function(c){n-=c.textContent.replace(/\s+/g,'').length}); return n }
+function proseRuby(root){
+  var cells=[];
+  root.querySelectorAll('.rb').forEach(function(w){
+    if(w.classList.contains('ip')||!w.querySelector('.rt')||w.closest('.igt-l,.igx-l,blockquote,.fig,.guide-ex,.vl')) return;
+    var cell=w.closest('td,th');
+    if(cell){ var i=cells.indexOf(cell); if(i<0){cells.push(cell); cell._rsProse=ownLen(cell)>=10} if(!cell._rsProse) return }
+    w.classList.add('ip');
+    var blk=w.parentNode.closest('p,li,dd,dt,td,th,h3,h4,h5,div,figcaption,summary'); if(blk) blk.classList.add('lh');
   });
 }
 
@@ -222,13 +247,25 @@ function vbar(sec){
   var bar=el('div','vbar'); bar.setAttribute('role','group'); bar.setAttribute('aria-label','行の表示'); bar.appendChild(el('span','vb-t','表示'));
   KEYS.forEach(function(k){var b=el('button','vb',k[1]); b.type='button'; b.dataset.k=k[0]; bar.appendChild(b)});
   var h=el('button','linkbtn vb-h','略号一覧'); h.type='button'; h.dataset.go='apxC'; bar.appendChild(h);
-  sec.insertBefore(bar,body); sync();
+  sec.insertBefore(bar,body); sync(); barVis();
+}
+/* いま見えている範囲に読みの付いた語がなければ（クイズなど）、切り替えの帯は出さない */
+function barVis(){
+  var v=document.querySelector('.view:not([hidden])'), bar=v&&v.querySelector(':scope > .vbar'); if(!bar) return;
+  var body=v.querySelector('.lesson-body'), steps=body?body.querySelectorAll(':scope > .step'):[], any=false;
+  if(!steps.length) any=true; else steps.forEach(function(s){ if(!s.hidden&&s.querySelector('.rb')) any=true });
+  bar.hidden=!any;
 }
 function sync(){
   var R=window.__rs; if(!R) return;
   document.querySelectorAll('.vbar .vb').forEach(function(b){b.setAttribute('aria-pressed',String(!!R.S[b.dataset.k]))});
+  var pv=R.S.prose==='both'?'both':'kana', sel=document.getElementById('st-prose');
+  document.documentElement.setAttribute('data-prose',pv); if(sel) sel.value=pv;
 }
 window.__rsSync=sync;
+document.addEventListener('change',function(e){
+  if(e.target&&e.target.id==='st-prose'&&window.__rs){ window.__rs.S.prose=e.target.value; window.__rs.apply() }
+});
 document.addEventListener('click',function(e){
   var b=e.target.closest&&e.target.closest('.vbar .vb'); if(!b||!window.__rs) return;
   var R=window.__rs; R.S[b.dataset.k]=!R.S[b.dataset.k]; R.apply();
@@ -278,7 +315,7 @@ if(window.matchMedia&&window.matchMedia('(hover:hover)').matches){
 }
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') hidePop() });
 document.addEventListener('stepchange',function(){
-  hidePop();
+  hidePop(); barVis();
   var t=document.querySelector('.view:not([hidden]) .stab[aria-current="step"]'), box=t&&t.parentNode;
   if(box&&box.scrollWidth>box.clientWidth+4) box.scrollLeft=Math.max(0,t.offsetLeft-box.offsetLeft-(box.clientWidth-t.offsetWidth)/2);
 });
@@ -298,7 +335,8 @@ window.__rsEnh=function(sec){
   var body=sec.querySelector('.lesson-body'); if(!body) return;
   try{
     body.querySelectorAll('.step').forEach(function(st){var h=st.querySelector('h3'); if(h&&/この課の要点/.test(h.textContent)) st.classList.add('kp')});
-    flatten(body); points(body); igtItems(body); readings(body); prose(body); tables(body); bound(body); vbar(sec);
+    if(!body.querySelector(':scope > .step')) body.classList.add('sheet');
+    flatten(body); points(body); igtItems(body); readings(body); prose(body); tables(body); adopt(body); bound(body); proseRuby(body); vbar(sec);
   }catch(err){ if(window.console) console.error('rs',err) }
 };
 })();

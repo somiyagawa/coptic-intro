@@ -113,7 +113,7 @@ def guide(t):
             + '<div class="guide-ex"><div class="igt-l">' + sample + '</div><div class="igt-t"><b>訳</b>' + tr + '</div></div>'
             '<ul><li>例文と講読本文では、語ごとに「読み・本文・グロス」を縦に並べ、その下に訳を置いています。</li>'
             '<li>上の「表示」のボタンで、行を一つずつ出したり消したりできます。同じボタンが各課の上にもあります。</li>'
-            '<li>説明文や表の中のコプト語（点線の下線つき）は、押すと分析が出ます。略号の意味もそこに出ます。</li>'
+            '<li>説明文の中のコプト語には、上にカナの読みだけを小さく添えています。点線の下線つきの語は、押すと分析（区切り・転写・グロス・略号の意味）が出ます。</li>'
             '<li>講読本文は節ごとに区切り、その節の訳をすぐ下に置いています。訳を隠して読む練習は「表示設定」でできます。</li>'
             '<li>クイズは 1〜4 の数字キーでも答えられます。</li></ul></div>\n      ')
     a = '<h3 class="h-sec">復習ツール</h3>'
@@ -127,6 +127,14 @@ def layer(t):
     t = guide(t)
     t = one(t, GLOSS_OLD, GLOSS_NEW)
     t = one(t, '<label for="st-gloss">グロスを付ける範囲</label>', '<label for="st-gloss">グロスを並べる範囲</label>')
+    # 説明文の中のルビ（既定はカナだけ）／文字の大きさの既定と上限
+    a = '<div class="setrow"><label for="st-seg">'
+    t = one(t, a, '<div class="setrow"><label for="st-prose">説明文の中のルビ</label><select id="st-prose"><option value="kana">カナだけ</option><option value="both">転写とカナ</option></select></div>\n      ' + a)
+    t = one(t, '<input type="range" id="st-fs" min="14" max="22" step="1">', '<input type="range" id="st-fs" min="14" max="24" step="1">')
+    t = one(t, "best:{},last:null,fs:17};", "best:{},last:null,fs:18};")
+    t = one(t, "var DEF={skin:'parch',gl:true,gp:true,seg:true,kana:true,latin:true,gloss:'all',tr:'show',fs:17,cs:'1',rs:'1'};",
+            "var DEF={skin:'papyrus',gl:true,gp:true,seg:true,kana:true,latin:true,gloss:'all',tr:'show',fs:18,cs:'1',rs:'1',prose:'kana'};")
+    t = one(t, "if(S.fs===16) S.fs=17;", "if(S.fs===16) S.fs=17;\nif(S.rsv!==3){ if(S.fs===17) S.fs=18; S.rsv=3 }")
     # 本体スクリプトへの差し込み
     t = one(t, "function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}",
             "function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}\nwindow.__rs={S:S,apply:function(){applySet()}};")
@@ -136,6 +144,10 @@ def layer(t):
     t = one(t, "het.textContent=q.h; fb.textContent='';", "het.textContent=q.h; fb.textContent=''; fb.className='q-fb';")
     t = one(t, "if(r===q.r){score++; fb.textContent=", "if(r===q.r){score++; fb.className='q-fb ok'; fb.textContent=")
     t = one(t, "else{b.classList.add('wrong'); fb.textContent=", "else{b.classList.add('wrong'); fb.className='q-fb ng'; fb.textContent=")
+    # 上の帯の題：狭い画面で折り返す位置を決めておく
+    for old, new in (('基礎コプト語サイード方言文法入門', '基礎コプト語<wbr>サイード方言<wbr>文法入門'), ('コプト語教会ボハイラ方言入門', 'コプト語教会<wbr>ボハイラ方言<wbr>入門')):
+        b = 'id="home-btn" type="button">%s</button>' % old
+        if b in t: t = one(t, b, 'id="home-btn" type="button">%s</button>' % new)
     k = t.index('<script>\n(function(){\nvar D=JSON.parse')
     t = t[:k] + '<script>\n' + js + '</script>\n' + t[k:]
     return t
