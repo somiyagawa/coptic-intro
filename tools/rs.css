@@ -103,9 +103,9 @@ td .copt,th .copt{font-size:calc(1.42em * var(--cs,1))}
 td.lh .copt{font-size:calc(1.3em * var(--cs,1))}
 table.has-tr td:first-child .rt .rl{display:none}
 table.has-tr td:first-child .copt{font-size:calc(1.62em * var(--cs,1))}
-td.nw{font-weight:700}
 .bg{white-space:nowrap}
 .bg>.rb.ip{margin:0 .03em!important}
+:root:not([data-gloss="all"]) .bg>.rb.ip .rt{margin-inline:0}
 td.nw{white-space:nowrap}
 
 /* ---- ルビとグロスの文字 ---- */
@@ -125,6 +125,40 @@ td.nw{white-space:nowrap}
 :root:not([data-gloss="all"]) .lh{line-height:var(--plh)}
 :root:not([data-gloss="all"]) .rb.ip{margin:0 .12em}
 :root:not([data-gloss="all"]) .lh .copt{word-spacing:.16em}
+
+/* ---- 列をそろえる：読みやグロスの付いた語も、付かない語と同じ位置から始める ---- */
+/* 表の欄（説明文でない欄）：語と読みを左にそろえる */
+:is(td,th) .rb:not(.ip){text-align:left}
+:is(td,th) .rb:not(.ip) :is(.rw,.rbi){text-align:left}
+:root:not([data-gloss="all"]) :is(td,th) .rb:not(.ip){margin:0 .3em .12em 0}
+:root:not([data-gloss="all"]) :is(td,th) .bg>.rb:not(.ip){margin-right:0}
+td.rh{font-weight:700;font-family:var(--font-body)}
+/* 例文・講読本文：グロスのない語も左にそろえる */
+:is(.igt-l,.igx-l,blockquote) .rb:not(.g){text-align:left}
+/* 図の札：読みの付いた札があっても、語の行と下の注記の行を札どうしでそろえる */
+.fig .blk{justify-content:flex-start}
+.fig{--fh:calc(var(--rt-n) * var(--u) * .975 * var(--rs,1) + var(--u) * 1.5)}
+.fblks.hasrt .bc::before{content:"";display:inline-block;width:0;height:var(--fh);vertical-align:baseline}
+.fig .blk .rb{margin:0}
+.fig .blk .rb .rt{margin-inline:-.8em}
+.fig .fres .rb{text-align:left;margin:0 .1em .2em 0}
+/* グロスを全部並べる設定では、説明文の中の語も左にそろえる */
+:root[data-gloss="all"] .rb{text-align:left}
+:root[data-gloss="all"] :is(td,th) .rb:not(.g){margin-left:0}
+/* 図の列：見出し・札・結果を、行をまたいで同じ位置にそろえる */
+@supports (grid-template-columns:subgrid){
+  @media (min-width:760px){
+    .fig{display:grid;grid-template-columns:9.5em fit-content(56%) minmax(0,1fr);gap:12px 18px}
+    .fig>*{grid-column:1/-1;min-width:0}
+    .fig>.frow{display:grid;grid-template-columns:subgrid;align-items:center}
+    .frow>.flab,.frow>.fres{flex:none}
+    /* 読みの付いた札がある行は、右の結果の語も札の語と同じ高さに置く */
+    .frow.al{align-items:start}
+    .frow.al>.flab{align-self:center}
+    .frow.al>.fres{padding-top:10px}
+    .frow.al>.fres::before{display:inline-flex;align-items:flex-end;height:var(--fh);vertical-align:baseline}
+  }
+}
 
 /* 行間グロスを並べる場所：例文（.igt-l）、説明文から取り出した例（.igx-l）、講読本文 */
 :is(.igt-l,.igx-l) .copt{font-size:calc(1.6em * var(--cs,1))}

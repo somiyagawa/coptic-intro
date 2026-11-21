@@ -214,6 +214,27 @@ function bound(root){
   });
 }
 
+/* 5a. 語のすぐ後ろ（語頭の接辞では前）の - と ⸗ を、読みの付いた語の箱に入れる。
+       読みが語より長いときに、語と - の間が空かないようにするため（ϯ - → ϯ-）。 */
+function glue(root){
+  root.querySelectorAll('.copt').forEach(function(c){
+    if(c.dataset.gl||c.closest('blockquote,.fig')) return; c.dataset.gl='1';
+    var boxes=[c].concat([].slice.call(c.querySelectorAll(':scope > .bg')));
+    boxes.forEach(function(box){
+      [].slice.call(box.childNodes).forEach(function(n){
+        if(n.nodeType!==3) return; var m, prev=n.previousSibling, next=n.nextSibling;
+        if(prev&&prev.nodeType===1&&prev.classList.contains('rb')&&(m=n.data.match(/^[-⸗]+/))){ put(prev,m[0],false); n.data=n.data.slice(m[0].length) }
+        else if(!prev&&next&&next.nodeType===1&&next.classList.contains('rb')&&(m=n.data.match(/^[-⸗]+$/))){ put(next,m[0],true); n.data='' }
+        if(!n.data) n.remove();
+      });
+    });
+  });
+  function put(rb,s,front){
+    var targets=rb.querySelectorAll('.w0,.w1'); if(!targets.length) targets=[rb.querySelector('.rw')];
+    [].forEach.call(targets,function(x){ if(!x) return; if(front) x.insertBefore(document.createTextNode(s),x.firstChild); else x.appendChild(document.createTextNode(s)) });
+  }
+}
+
 /* 5b. 表：語彙表の見出し語にはグロスを付けない／短い見出しの列は折り返さない */
 function tables(root){
   root.querySelectorAll('table').forEach(function(tb){
@@ -222,19 +243,27 @@ function tables(root){
       w.classList.remove('g'); w.querySelectorAll('.gl,.gp,.w1').forEach(function(x){x.remove()});
     });
     if(heads.indexOf('転写')>=0) tb.classList.add('has-tr');
-    tb.querySelectorAll('tbody td:first-child').forEach(function(td){ if(!td.querySelector('.copt')&&td.textContent.trim().length<=9) td.classList.add('nw') });
+    var first=[].slice.call(tb.querySelectorAll('tbody tr > td:first-child')), lab=first.length>0;
+    first.forEach(function(td){ var n=td.textContent.trim().length; if(td.querySelector('.copt')||n>18||!n) lab=false; else if(n<=9) td.classList.add('nw') });
+    if(lab) first.forEach(function(td){td.classList.add('rh')});   /* 一列目が短い見出しだけの表は、その列を太字でそろえる */
+    /* 短い欄（名称など）は折り返さない */
+    tb.querySelectorAll('tbody td').forEach(function(td){ if(td.querySelector('.copt')) return; var n=td.textContent.trim().length; if(n&&n<=10) td.classList.add('nw') });
   });
 }
+
+/* 5b'. 図の札：読みの付いた札がある並びに印を付ける（札どうしで語の行をそろえるため） */
+function figs(root){ root.querySelectorAll('.fblks').forEach(function(f){ if(f.querySelector('.rt')){ f.classList.add('hasrt'); if(f.parentNode.classList.contains('frow')) f.parentNode.classList.add('al') } }) }
 
 /* 5c. 説明文の中の語：ルビを行の高さに数えない（.ip）。その語を含む段落は行間を広げて一定にする（.lh）。
        例文・講読本文・図・短い表の欄は、これまでどおり語ごとに読みを積む。 */
 function ownLen(e){ var n=e.textContent.replace(/\s+/g,'').length; e.querySelectorAll('.copt').forEach(function(c){n-=c.textContent.replace(/\s+/g,'').length}); return n }
+function visLen(e){ var n=0, w=document.createTreeWalker(e,NodeFilter.SHOW_TEXT,null), x; while((x=w.nextNode())){ if(!x.parentElement.closest('.rt,.gl,.gp,.w0')) n+=x.data.replace(/[\s\u0300-\u036f\ufe24-\ufe26]+/g,'').length } return n }
 function proseRuby(root){
   var cells=[];
   root.querySelectorAll('.rb').forEach(function(w){
     if(w.classList.contains('ip')||!w.querySelector('.rt')||w.closest('.igt-l,.igx-l,blockquote,.fig,.guide-ex,.vl')) return;
     var cell=w.closest('td,th');
-    if(cell){ var i=cells.indexOf(cell); if(i<0){cells.push(cell); cell._rsProse=ownLen(cell)>=10} if(!cell._rsProse) return }
+    if(cell){ var i=cells.indexOf(cell); if(i<0){cells.push(cell); cell._rsProse=ownLen(cell)>=10; if(!cell._rsProse&&visLen(cell)<=16) cell.classList.add('nw')} if(!cell._rsProse) return }
     w.classList.add('ip');
     var blk=w.parentNode.closest('p,li,dd,dt,td,th,h3,h4,h5,div,figcaption,summary'); if(blk) blk.classList.add('lh');
   });
@@ -336,7 +365,7 @@ window.__rsEnh=function(sec){
   try{
     body.querySelectorAll('.step').forEach(function(st){var h=st.querySelector('h3'); if(h&&/この課の要点/.test(h.textContent)) st.classList.add('kp')});
     if(!body.querySelector(':scope > .step')) body.classList.add('sheet');
-    flatten(body); points(body); igtItems(body); readings(body); prose(body); tables(body); adopt(body); bound(body); proseRuby(body); vbar(sec);
+    flatten(body); points(body); igtItems(body); readings(body); prose(body); tables(body); figs(body); adopt(body); bound(body); glue(body); proseRuby(body); vbar(sec);
   }catch(err){ if(window.console) console.error('rs',err) }
 };
 })();

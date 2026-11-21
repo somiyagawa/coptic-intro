@@ -7,7 +7,7 @@ BASE_DIR には改良前のページを置く（git show 2003160:sahidic.html > 
 同じ入力からは同じ出力ができる。重ねる内容：
   - tools/rs.css   読みやすさの層（文字の大きさ、例文・講読本文・クイズの体裁）
   - tools/rs.js    課を開いたときの DOM の組み直し（例文ブロック、節ごとの訳、語の分析）
-  - tools/kana_s.py サイード方言のカタカナ（重ね書きの母音、ⲃ）
+  - tools/kana_s.py サイード方言のカタカナ（重ね書きの母音、ⲃ、ⲟⲟⲩ）
 """
 import re, json, sys, os
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -27,12 +27,14 @@ def word_of(rw):
 RK = re.compile(r'(<span class="rk">)(.*?)(</span></span><span class="rw">)', re.S)
 COPT = re.compile('[\u2c80-\u2cff\u03e2-\u03ef][\u2c80-\u2cff\u03e2-\u03ef\u0300-\u036f\ufe24-\ufe26⸗]*')
 
+W1 = re.compile(r'<span class="w0">[^<]*</span><span class="w1">([^<]*)</span>')
 def kana_sahidic(t):
     stat = {'units': 0, 'changed': 0, 'problems': []}
     def f(m):
         w = COPT.search(t, m.end(), m.end() + 1500); stat['units'] += 1
         if not w: stat['problems'].append(('noword', m.group(2))); return m.group(0)
-        w = w.group(0); k2, st = kana_s.patch(w, m.group(2))
+        w = w.group(0); sg = W1.match(t, m.end())
+        k2, st = kana_s.patch(w, m.group(2), sg.group(1) if sg else None)
         if st[0] in ('ambiguous', 'nomatch') or st[1].startswith('count'): stat['problems'].append((w, m.group(2), st))
         if k2 != m.group(2): stat['changed'] += 1
         return m.group(1) + k2 + m.group(3)
@@ -61,8 +63,18 @@ def kana_sahidic(t):
             '「ワアヴ」、' + C('ⲟⲩⲏⲏⲃ') + '「ウェーエヴ」。長音説では母音を伸ばして読み、声門閉鎖音説では二つの母音字の間を切って読みます。')
     i = t.index('<strong>二重母音</strong>'); j = t.index('</li>', i)
     seg = t[i:j]; k = seg.index('ⲟⲟⲩ'); k2 = seg.index('「オーウ」', k)
-    seg = seg[:k2] + '「オオウ」' + seg[k2 + len('「オーウ」'):]
+    seg = seg[:k2] + '「オウ」' + seg[k2 + len('「オーウ」'):]
+    seg += ' ' + C('ⲟⲟⲩ') + ' は ' + C('ⲟ') + ' と ' + C('ⲟⲩ') + '（w）の組み合わせなので、重ね書きの母音とは扱わず「オウ」と書きます（' + C('ⲙⲟⲟⲩ') + ' モウ「水」、' + C('ϩⲟⲟⲩ') + ' ホウ「日」）。'
     t = t[:i] + seg + t[j:]
+    # 縮約した不定冠詞 ⲩ-（ⲉ-ⲩ-ⲣⲱⲙⲉ エ-ウ-ローメ）と、ⲉ の後で ⲩ と書く ⲟⲩ の読み（ウ）
+    RB = lambda lat, kana, w: '<span class="rb"><span class="rt" aria-hidden="true"><span class="rl">%s</span><span class="rk">%s</span></span><span class="rw">%s</span></span>' % (lat, kana, w)
+    t = one(t, RB('urôme', 'イローメ', 'ⲩⲣⲱⲙⲉ'), RB('u', 'ウ', 'ⲩ') + '-' + RB('rôme', 'ローメ', 'ⲣⲱⲙⲉ'))
+    t = one(t, RB('unoute', 'イヌーテ', 'ⲩⲛⲟⲩⲧⲉ'), RB('u', 'ウ', 'ⲩ') + '-' + RB('noute', 'ヌーテ', 'ⲛⲟⲩⲧⲉ'))
+    t = one(t, RB('ušê', 'イシェー', 'ⲩϣⲏ'), RB('ušê', 'ウシェー', 'ⲩϣⲏ'))
+    t = one(t, RB('uən', 'イエン', 'ⲩⲛ̄'), RB('uən', 'ウエン', 'ⲩⲛ̄'), 16)
+    # 解答の中の ϫⲟⲟⲩ（ϫⲟⲟ⸗ⲩ「それらを言う」）は語幹の重ね書き＋⸗ⲩ。ϫⲟⲟⲩ「送る」（ジョウ）と区別する
+    pat = re.compile(r'((?:<span class="rl">čoou</span><span class="rk">ジョウ</span>.{0,160}?){1,2})(?=ϫⲟⲟⲩ</span>(?:</span>)+ の ⸗)', re.S)
+    t, k = pat.subn(lambda m: m.group(1).replace('ジョウ', 'ジョオウ'), t); assert k == 2, k
     t = one(t, 'ジョイス、マーウ、ヘン', 'ジョイス、マアウ、ヘン', 2)
     t = one(t, 'カタカナは現在の教会発音（ギリシア式ボハイラ）です。カタカナでは、ⲏ・ⲱ・重ね書きの母音・強勢のある ⲟⲩ を長音符で、母音を伴わない子音を小さい字で、形態素の境界を中黒で示します。再建音・古式発音との違いは第1課の補説にまとめています。',
             'カタカナは大学の授業で使われる読み方です。カタカナでは、ⲏ・ⲱ・強勢のある ⲟⲩ を長音符で示します。重ね書きの母音は、長音説でも声門閉鎖音説でも読めるように、二つ目の母音字もそのまま書きます（ⲙⲁⲁⲩ マアウ）。母音を伴わない子音は小さい字で、形態素の境界は中黒で示します。')
@@ -152,6 +164,23 @@ def layer(t):
     t = t[:k] + '<script>\n' + js + '</script>\n' + t[k:]
     return t
 
+# 活用形の名前：ローマ数字（現在I・完了II・未来III）をやめ、第一現在・第二完了・第三未来と書く
+NUM = {'I': '第一', 'II': '第二', 'III': '第三'}
+TENSE = re.compile(r'(現在|未来|完了)(III|II|I)(?![A-Za-z])')
+def terms(t):
+    i = t.index('<header class="top"'); head, t = t[:i], t[i:]
+    t = one(t, '「現在I」「完了I」の I は、転換詞の付かない基本の形を指します。II は第二時制（下の「転換」）を指します。未来III だけは別の活用で、I・II とは形の上のつながりがありません。',
+            '「第一現在」「第一完了」の「第一」は、転換詞の付かない基本の形を指します。「第二」は第二時制（下の「転換」）を指します。第三未来だけは別の活用で、第一・第二とは形の上のつながりがありません。文法書によっては「現在I」「完了II」「未来III」のようにローマ数字で書きます。')
+    t = one(t, 'I と II の番号を付けました。II の形の働きは長くわかりませんでした。ポロツキーが1944年の研究で、II の形は、',
+            '第一・第二（I・II）の番号を付けました。第二の形の働きは長くわかりませんでした。ポロツキーが1944年の研究で、第二の形は、')
+    keep = '「現在I」「完了II」「未来III」のようにローマ数字で書きます。'
+    a, b = t.split(keep)
+    n = len(TENSE.findall(a)) + len(TENSE.findall(b))
+    f = lambda m: NUM[m.group(2)] + m.group(1)
+    t = TENSE.sub(f, a) + keep + TENSE.sub(f, b)
+    assert not re.search(r'(現在|未来|完了)\s?[ⅠⅡⅢ]', t)
+    return head + t, n
+
 def main(base, out):
     for name in ('sahidic', 'bohairic'):
         t = open(os.path.join(base, name + '.html'), encoding='utf-8').read()
@@ -159,6 +188,7 @@ def main(base, out):
             t, st = kana_sahidic(t); print(name, 'kana units', st['units'], 'changed', st['changed'], 'data', st['data'], 'problems', st['problems'])
         else:
             t, n = kana_bohairic(t); print(name, 'kana fixes', n)
+        t, n = terms(t); print(name, 'tense names', n)
         t = layer(t)
         open(os.path.join(out, name + '.html'), 'w', encoding='utf-8').write(t)
         print(name, len(t))

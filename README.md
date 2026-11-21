@@ -17,7 +17,7 @@ GitHub の main に push すると Vercel が公開します。フレームワ�
     mkdir base && git show 2003160:sahidic.html > base/sahidic.html && git show 2003160:bohairic.html > base/bohairic.html
     python3 tools/restyle.py base .
 
-- tools/restyle.py  重ねる処理の本体
+- tools/restyle.py  重ねる処理の本体（活用形の名前を 第一現在・第二完了・第三未来 と書く処理、縮約した不定冠詞 ⲉ-ⲩ-ⲣⲱⲙⲉ の修正を含む）
 - tools/rs.css      読みやすさの層（文字の大きさ、面と余白、例文・講読本文・表・クイズの体裁、狭い画面の帯）
 - tools/rs.js       課を開いたときの組み直し（番号つき例文、節ごとの訳、語を押すと出る分析、表示の切り替え、説明文の中のルビを行の高さに数えない処理）
-- tools/kana_s.py   サイード方言のカタカナ（重ね書きの母音は マアウ・ワアヴ・ウェーエヴ、ⲃ はヴ行。B2V=False でバ行に戻る）
+- tools/kana_s.py   サイード方言のカタカナ（重ね書きの母音は マアウ・ワアヴ・ウェーエヴ、ⲟⲟⲩ は オウ（ⲙⲟⲟⲩ モウ）、ⲃ はヴ行。B2V=False でバ行に戻る）
