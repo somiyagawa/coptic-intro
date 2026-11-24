@@ -226,7 +226,7 @@ def inline(node, ctx, parts=None):
             elif c.name == 'small': out.append('{\\footnotesize '); walk(c); out.append('}')
             elif c.name == 'sup': out.append('\\textsuperscript{'); walk(c); out.append('}')
             elif c.name == 'sub': out.append('\\textsubscript{'); walk(c); out.append('}')
-            elif c.name == 'br': out.append('\\\\ ')
+            elif c.name == 'br': out.append('\\newline ')        # 表のセルの中でも行だけを替える（\\ は表の行を終えてしまう）
             elif c.name in ('ul', 'ol', 'table', 'div', 'blockquote', 'p'):
                 if parts is None: out.append(' ' + blocks([c], ctx) + ' ')
                 else: flush(); parts.append(('b', c))
