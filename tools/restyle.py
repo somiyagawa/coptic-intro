@@ -12,7 +12,7 @@ BASE_DIR には改良前のページを置く（git show 2003160:sahidic.html > 
 import re, json, sys, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import kana_s
+import kana_s, ang
 
 UNIT = re.compile(r'(<span class="rt" aria-hidden="true"><span class="rl">.*?</span><span class="rk">)(.*?)(</span></span><span class="rw">)(.*?)(</span></span>)', re.S)
 
@@ -224,6 +224,8 @@ def main(base, out):
              '<tr>\n<td>付録</td>\n<td>A〜F</td>\n<td>活用の早見表、練習問題解答、グロスの略号、例文の出典、統語論・意味論・語用論のまとめ、'
              '他の文法書との対応、参考文献</td>\n</tr>')
         assert t.count(a) == 1, (name, t.count(a)); t = t.replace(a, b)
+        # 独立代名詞の短い形（ⲁⲛⲅ̄- の類）の説明を書き直す（tools/ang.py）
+        t = ang.sahidic(t, regloss) if name == 'sahidic' else ang.bohairic(t)
         t = layer(t)
         open(os.path.join(out, name + '.html'), 'w', encoding='utf-8').write(t)
         print(name, len(t))
