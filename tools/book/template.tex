@@ -1,0 +1,121 @@
+% 『基礎コプト語サイード方言文法入門』『コプト語教会ボハイラ方言入門』書籍版の組版（LuaLaTeX + jlreq）
+% 本文は tools/book/tex.py がウェブ版の内容から作って差し込む。
+\documentclass[book,paper=b5,fontsize=10pt,jafontsize=9.6pt,line_length=36zw,baselineskip=18pt,number_of_lines=30,head_space=18mm,gutter=22mm,twoside]{jlreq}
+\usepackage{luatexja-fontspec}
+\directlua{luaotfload.add_fallback("latfb",{"FreeSerif:mode=harf;","DejaVu Serif:mode=harf;"})}
+\setmainfont{Gentium Plus}[RawFeature={fallback=latfb},Scale=1.0]
+\setsansfont{TeX Gyre Heros}[RawFeature={fallback=latfb},Scale=0.9]
+\setmainjfont{Noto Serif CJK JP}[BoldFont={Noto Serif CJK JP Bold}]
+\setsansjfont{Noto Sans CJK JP}[BoldFont={Noto Sans CJK JP Bold}]
+\newfontfamily\copfontraw{Antinoou.ttf}[Path=./,Renderer=HarfBuzz,Scale=1.12]
+\newfontfamily\latf{Gentium Plus}[Renderer=HarfBuzz]
+\ltjsetparameter{jacharrange={-2}}
+\newcommand\jaon{\ltjsetparameter{jacharrange={-1,-2,+3,-4,-5,+6,+7,-8}}}
+\newcommand\copfont{\copfontraw\ltjsetparameter{jacharrange={-1,-2,-3,-4,-5,-6,-7,-8}}}
+\usepackage{xcolor,graphicx,longtable,booktabs,array,enumitem,colortbl,needspace}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks,pdfusetitle,unicode]{hyperref}
+\definecolor{accent}{HTML}{7A2412}\definecolor{muted}{HTML}{5E4E3A}\definecolor{okc}{HTML}{2F4F16}\definecolor{badc}{HTML}{8F1D14}
+\definecolor{paper}{HTML}{FAF5E8}\definecolor{rule}{HTML}{BFA46A}
+\title{@@TITLE@@}\author{}
+\raggedbottom
+\setlist{leftmargin=1.6em,itemsep=3pt,topsep=4pt,parsep=0pt}
+
+% ---- 記号と小さい字 ----
+\newcommand\dg{\raisebox{.55ex}{\scalebox{.62}{†}}}
+\newcommand\cps{\char"2E17\relax}
+\newcommand\kc[1]{\raisebox{-.12ex}{\scalebox{.74}{#1}}}
+\newcommand\jx[1]{{\jaon\normalfont #1}}
+\newcommand\gsc[1]{{\color{accent}\textsc{#1}}}
+
+% ---- 読みとグロスの行（字の大きさと行の高さを決めておき、語どうしで行がそろうようにする） ----
+\newcommand\rbl[1]{{\latf\itshape\fontsize{6.8}{6.8}\selectfont\color{muted}#1}}
+\newcommand\rbk[1]{{\jaon\sffamily\fontsize{6.3}{6.3}\selectfont\color{accent}#1}}
+\newcommand\gll[1]{{\jaon\rmfamily\fontsize{7.2}{7.2}\selectfont #1}}
+\newcommand\glp[1]{{\jaon\sffamily\fontsize{6.6}{6.6}\selectfont\color{okc}#1}}
+\newcommand\sL{\vrule height 5.4pt depth 1.7pt width 0pt}
+\newcommand\sK{\vrule height 5.7pt depth 1.1pt width 0pt}
+\newcommand\sB{\vrule height .86\fontdimen6\font depth .25\fontdimen6\font width 0pt}
+\newcommand\sG{\vrule height 6.4pt depth 2.1pt width 0pt}
+\newcommand\copx{\copfont\fontsize{11.4}{11.4}\selectfont}
+
+% 説明文の中の語：上にカナだけを置き、行の高さには数えない（行送りを一定に保つ）
+\newdimen\prw \newdimen\prk
+\newcommand\prcore[3]{\leavevmode\begingroup
+  \setbox0\hbox{{\copfont #1}}\setbox2\hbox{{\fontsize{5.7}{5.7}\selectfont\jaon\sffamily\color{accent}#2}}%
+  \prw=\wd0 \prk=\wd2 \advance\prk by -#3\relax \ifdim\prk>\prw \prw=\prk\fi
+  \dimen4=\ht0 \ifdim\dimen4<.74\fontdimen6\font \dimen4=.74\fontdimen6\font\fi
+  \hbox to\prw{\hss\copy0\hss}\kern-\prw
+  \hbox to\prw{\hss\smash{\raise\dimexpr\dimen4+1.1pt\relax\box2}\hss}\endgroup}
+\newcommand\pr[2]{\prcore{#1}{#2}{3pt}}
+\newcommand\prg[2]{\prcore{#1}{#2}{0pt}}
+
+% 表・図の中の語：転写・カナ・語形を左そろえで積む
+\newcommand\rw[3]{\leavevmode\vbox{\offinterlineskip\halign{##\hfil\cr\rbl{#2}\sL\cr\rbk{#3}\sK\cr\noalign{\vskip.6pt}{\copfont #1\sB}\cr}}}
+\newcommand\rwk[2]{\leavevmode\vbox{\offinterlineskip\halign{##\hfil\cr\rbk{#2}\sK\cr\noalign{\vskip.6pt}{\copfont #1\sB}\cr}}}
+
+% 例文・講読本文の語：転写・カナ・語形・略号のグロス・やさしいグロスを左そろえで積む
+\newcommand\gwtop[3]{\vbox{\offinterlineskip\halign{##\hfil\cr\rbl{#2}\sL\cr\rbk{#3}\sK\cr\noalign{\vskip1pt}{\copx #1\sB}\cr}}}
+\newcommand\gw[5]{\leavevmode\vtop{\offinterlineskip\halign{##\hfil\cr\gwtop{#1}{#2}{#3}\cr\noalign{\vskip1.6pt}\gll{#4}\sG\cr\glp{#5}\sG\cr}}}
+\newcommand\gv[4]{\leavevmode\vtop{\offinterlineskip\halign{##\hfil\cr\gwtop{#1}{#2}{#3}\cr\noalign{\vskip1.6pt}\gll{#4}\sG\cr}}}
+\newcommand\gu[3]{\leavevmode\gwtop{#1}{#2}{#3}}
+\newcommand\gs{\hskip 10pt plus 4pt minus 2pt\relax}
+\newlength\exin \setlength\exin{2.2em}
+\newenvironment{igl}{\par\begingroup\raggedright\parindent=0pt\leftskip=\exin\lineskip=5pt\lineskiplimit=\maxdimen\noindent\ignorespaces}{\par\endgroup}
+\newcommand\exno[1]{\llap{\hbox to\exin{\sffamily\bfseries\small\color{accent}(#1)\hss}}}
+\newcommand\vsno[1]{\llap{\hbox to\exin{\sffamily\bfseries\small\color{accent}#1\hss}}}
+\newcommand\ext[2]{\par\nobreak\vskip 2.5pt{\leftskip=\exin\rightskip=0pt plus 2em\noindent #1\def\tmp{#2}\ifx\tmp\empty\else\enskip{\footnotesize\color{muted}#2}\fi\par}}
+\newcommand\vtr[1]{\par\nobreak\vskip 2.5pt{\leftskip=\exin\noindent{\sffamily\bfseries\fontsize{6.6}{6.6}\selectfont\color{accent}訳}\enskip #1\par}}
+\newenvironment{ex}{\par\addvspace{8pt}\begingroup\interlinepenalty=10000 }{\par\endgroup\addvspace{6pt}}
+\newenvironment{exi}{\par\addvspace{5pt}\begingroup\interlinepenalty=10000 \setlength\exin{1.2em}}{\par\endgroup\addvspace{4pt}}
+\newenvironment{rdv}{\par\addvspace{9pt}\begingroup\interlinepenalty=300 }{\par\endgroup\addvspace{7pt}}
+
+% ---- 表 ----
+\newcommand\tblskip{\setlength\LTpre{7pt}\setlength\LTpost{9pt}\setlength\LTleft{0pt}\setlength\LTright{0pt plus 1fil}\setlength\tabcolsep{4pt}\renewcommand\arraystretch{1.12}}
+\newcommand\prs{\vrule height 1.6em width 0pt\relax\baselineskip=1.85em\relax}
+\newlength\tblw
+% 行の間の細い線。ページの切れ目は線のすぐ下にしか来ない（\rowsepk はそこでも切らない）
+\newcommand\rowsep{\noalign{\penalty10000\vskip2.6pt{\color{rule!55}\hrule height.25pt width\tblw}\vskip2.6pt}}
+\newcommand\rowsepk{\noalign{\penalty10000\vskip2.6pt{\color{rule!55}\hrule height.25pt width\tblw}\penalty10000\vskip2.6pt}}
+\newcommand\thd[1]{{\sffamily\bfseries #1}}
+
+% ---- 見出し ----
+\newcommand\partpage[1]{\cleardoublepage\thispagestyle{empty}\vspace*{.3\textheight}\begin{center}{\sffamily\bfseries\Huge #1}\\[6mm]{\color{rule}\rule{40mm}{1.2pt}}\end{center}\addcontentsline{toc}{part}{#1}\clearpage}
+\newcommand\lesson[3]{\clearpage\phantomsection\addcontentsline{toc}{chapter}{#3}\markboth{#3}{#3}%
+ \thispagestyle{plain}\vspace*{4mm}\noindent{\sffamily\bfseries\large\color{accent}#1}\par\vspace{2mm}\noindent{\sffamily\bfseries\LARGE #2}\par\vspace{2mm}\noindent{\color{rule}\rule{\linewidth}{1.2pt}}\par\vspace{6mm}}
+\RenewBlockHeading{section}{1}{font={\sffamily\bfseries\large},before_space=1.2\baselineskip,after_space=.5\baselineskip,lines=2,label_format={}}
+\RenewBlockHeading{subsection}{2}{font={\sffamily\bfseries\normalsize},before_space=.9\baselineskip,after_space=.3\baselineskip,lines=1,label_format={}}
+
+% ---- 囲み ----
+% 見出しつきの項目：左に帯を付け、見出しを一行に立てる
+\newtcolorbox{ptbox}{enhanced jigsaw,breakable,blanker,left=9pt,top=1pt,bottom=1pt,before skip=7pt,after skip=7pt,borderline west={1.6pt}{0pt}{accent}}
+\newcommand\pth[1]{{\sffamily\bfseries #1}\par\nobreak\vskip 1pt}
+% この課の要点
+\newtcolorbox{kpbox}[1]{enhanced jigsaw,breakable,colback=paper,colframe=rule,boxrule=.5pt,arc=2pt,left=8pt,right=8pt,top=5pt,bottom=5pt,before skip=10pt,after skip=10pt,
+  borderline west={2pt}{0pt}{accent},title={#1},coltitle=black,colbacktitle=paper,fonttitle=\sffamily\bfseries\large,titlerule=0pt,toptitle=5pt,bottomtitle=0pt}
+% 練習
+\newtcolorbox{exbox}[1]{enhanced jigsaw,breakable,colback=paper,colframe=rule,boxrule=.5pt,arc=2pt,left=6pt,right=6pt,top=10pt,bottom=4pt,before skip=9pt,after skip=7pt,title={#1},
+  attach boxed title to top left={xshift=6pt,yshift=-\tcboxedtitleheight/2},boxed title style={colback=accent,colframe=accent,arc=1pt,boxrule=0pt,left=3pt,right=3pt,top=1pt,bottom=1pt},fonttitle=\sffamily\bfseries\scriptsize}
+% 図
+\newtcolorbox{figbox}[1]{enhanced jigsaw,breakable,colback=paper,colframe=rule,boxrule=.6pt,arc=3pt,left=8pt,right=8pt,top=6pt,bottom=6pt,before skip=9pt,after skip=10pt,title={#1},coltitle=black,colbacktitle=paper,fonttitle=\sffamily\bfseries\small,titlerule=.4pt,toptitle=4pt,bottomtitle=3pt}
+\tcbset{blkn/.style={colframe=rule,colback=white},blkv/.style={colframe=accent,colback=accent!8},blko/.style={colframe=okc,colback=okc!10},blkb/.style={colframe=badc,colback=badc!8},blks/.style={colframe=accent,colback=white},blka/.style={colframe=muted,colback=white,borderline={.5pt}{0pt}{muted,dashed},boxrule=0pt},blkst/.style={colframe=muted,colback=white,boxrule=1.2pt}}
+% 図の札：#1 体裁、#2 中身、#3 下の注記。\fgs を中身の先頭に入れると、読みの付いた札と同じ高さになる
+\newcommand\fgs{\vrule height 23pt width 0pt}
+\newcommand\blk[3]{\tcbox[on line,boxsep=0pt,left=4pt,right=4pt,top=3pt,bottom=3pt,arc=2pt,boxrule=.7pt,#1]{\begin{tabular}[b]{@{}c@{}}{#2}\\[1.5pt]{\sffamily\fontsize{6.4}{7.2}\selectfont\color{muted}#3}\end{tabular}}}
+\newcommand\flab[2]{{\raggedright\sffamily\small\bfseries #1\par{\mdseries\fontsize{6.8}{8.6}\selectfont\color{muted}#2\par}}}
+\newcommand\figcap[1]{\par\smallskip{\footnotesize\color{muted}#1\par}}
+\newcommand\refp[1]{\par\smallskip{\footnotesize\color{muted}\noindent #1\par}\smallskip}
+
+\begin{document}
+\frontmatter
+\begin{titlepage}\centering\vspace*{35mm}
+{\copfont\LARGE\color{accent}@@COPT@@\par}\vspace{14mm}
+{\sffamily\bfseries\fontsize{24}{34}\selectfont @@TITLEBR@@\par}\vspace{7mm}
+{\large @@SUB@@\par}\vspace{10mm}{\color{rule}\rule{50mm}{1.2pt}\par}\vspace{10mm}
+\begin{minipage}{.72\linewidth}\small @@LEAD@@\end{minipage}\par\vfill
+{\small @@DATE@@\par}\vspace*{10mm}
+\end{titlepage}
+\tableofcontents
+\mainmatter
+@@BODY@@
+\end{document}

@@ -28,6 +28,18 @@ RK = re.compile(r'(<span class="rk">)(.*?)(</span></span><span class="rw">)', re
 COPT = re.compile('[\u2c80-\u2cff\u03e2-\u03ef][\u2c80-\u2cff\u03e2-\u03ef\u0300-\u036f\ufe24-\ufe26⸗]*')
 
 W1 = re.compile(r'<span class="w0">[^<]*</span><span class="w1">([^<]*)</span>')
+
+def regloss(t, w0, old_w1, new_w1, gl, gp=None, nodot=False, after=None, count=None):
+    """グロスの付いた語（w0）のうち、区切りが old_w1 のものの区切りとグロスを付け直す。after は直後に続く文字列の条件"""
+    unit = re.compile(r'(<span class="rb g[^"]*"><span class="rbi"><span class="rt" aria-hidden="true"><span class="rl">[^<]*</span><span class="rk">)((?:[^<]|<i class="kc">[^<]*</i>)*)'
+                      r'(</span></span><span class="rw"><span class="w0">' + re.escape(w0) + r'</span><span class="w1">)' + re.escape(old_w1) +
+                      r'(</span></span></span>)<span class="gl">(?:[^<]|<i class="sc">[^<]*</i>)*</span>(?:<span class="gp">[^<]*</span>)?(</span>)' + (r'(?=' + after + ')' if after else ''))
+    def f(m):
+        k = m.group(2).replace('・', '') if nodot else m.group(2)   # 一語になるならカナの中黒も外す
+        return m.group(1) + k + m.group(3) + new_w1 + m.group(4) + '<span class="gl">' + gl + '</span>' + ('<span class="gp">' + gp + '</span>' if gp else '') + m.group(5)
+    t, k = unit.subn(f, t)
+    assert count is None or k == count, (w0, k)
+    return t
 def kana_sahidic(t):
     stat = {'units': 0, 'changed': 0, 'problems': []}
     def f(m):
@@ -73,6 +85,17 @@ def kana_sahidic(t):
     t = one(t, RB('ušê', 'イシェー', 'ⲩϣⲏ'), RB('ušê', 'ウシェー', 'ⲩϣⲏ'))
     t = one(t, RB('uən', 'イエン', 'ⲩⲛ̄'), RB('uən', 'ウエン', 'ⲩⲛ̄'), 16)
     # 解答の中の ϫⲟⲟⲩ（ϫⲟⲟ⸗ⲩ「それらを言う」）は語幹の重ね書き＋⸗ⲩ。ϫⲟⲟⲩ「送る」（ジョウ）と区別する
+    # 一語の ⲟⲩⲇⲉ が ⲟⲩ-ⲇⲉ と区切られていた／ⲛ̄ϩⲏⲧ「私の中に」が「の-心」と分析されていた
+    t = regloss(t, 'ⲟⲩⲇⲉ', 'ⲟⲩ-ⲇⲉ', 'ⲟⲩⲇⲉ', '〜もない', nodot=True, count=5)
+    t = regloss(t, 'ⲛ̄ϩⲏⲧ', 'ⲛ̄-ϩⲏⲧ', 'ⲛ̄ϩⲏⲧ', '中に=1<i class="sc">sg</i>', '中に・私', nodot=True, after='</span>「私の中に」', count=1)
+    # ⲛⲁⲩ「見る」が ⲛⲁ⸗ⲩ「彼らに」と分析されていた箇所（語彙の提示・練習・図・命令形の表・解答）を直す
+    bad = ('<span class="rw"><span class="w0">ⲛⲁⲩ</span><span class="w1">ⲛⲁ⸗ⲩ</span></span></span>'
+           '<span class="gl"><i class="sc">dat</i>=3<i class="sc">pl</i></span><span class="gp">に・彼ら</span></span>')
+    good = '<span class="rw"><span class="w0">ⲛⲁⲩ</span><span class="w1">ⲛⲁⲩ</span></span></span><span class="gl">見る</span></span>'
+    see = re.compile(re.escape(bad) + r'(?=</span>「見る」|</span></td>\n<td>nau</td>|</span> を完了形で全人称に活用せよ|</span></span><small>見る</small>'
+                     r'|</span></span><span class="w1"><span class="copt"|</span></span></span></span><span class="gl">見る</span>'
+                     r'|</span></td>\n<td>(?:(?!</tr>).){0,900}見なさい)', re.S)
+    t, k = see.subn(good, t); assert k == 9, k
     pat = re.compile(r'((?:<span class="rl">čoou</span><span class="rk">ジョウ</span>.{0,160}?){1,2})(?=ϫⲟⲟⲩ</span>(?:</span>)+ の ⸗)', re.S)
     t, k = pat.subn(lambda m: m.group(1).replace('ジョウ', 'ジョオウ'), t); assert k == 2, k
     t = one(t, 'ジョイス、マーウ、ヘン', 'ジョイス、マアウ、ヘン', 2)
@@ -188,7 +211,19 @@ def main(base, out):
             t, st = kana_sahidic(t); print(name, 'kana units', st['units'], 'changed', st['changed'], 'data', st['data'], 'problems', st['problems'])
         else:
             t, n = kana_bohairic(t); print(name, 'kana fixes', n)
+            # 一語の ⲟⲩⲇⲉ が ⲟⲩ-ⲇⲉ と区切られていた／名詞の ϯ-ⲥ̀ⲃⲱ「知恵」が「与える-教え」と分析されていた
+            t = regloss(t, 'ⲟⲩⲇⲉ', 'ⲟⲩ-ⲇⲉ', 'ⲟⲩⲇⲉ', '〜もない', nodot=True, count=3)
+            t = regloss(t, 'ϯⲥ̀ⲃⲱ', 'ϯ-ⲥ̀ⲃⲱ', 'ϯ-ⲥ̀ⲃⲱ', '<i class="sc">def</i>.<i class="sc">f</i>-教え', 'その-教え', after='</span>「知恵」', count=1)
         t, n = terms(t); print(name, 'tense names', n)
+        # 「コースの構成」の表：文法編は28章ある（14章だったころの記述が残っていた）。付録の行も足す
+        a = ('<td>文法1〜14</td>\n<td>項目別にまとめた参照用の文法（音と文字、名詞、冠詞、代名詞、数詞、前置詞、修飾、動詞の形、活用、'
+             '文の型、否定と疑問、従属節、小辞、語形成）</td>\n</tr>')
+        b = ('<td>文法1〜28</td>\n<td>項目別にまとめた参照用の文法。1〜14 は品詞と文の骨組み（音と文字、名詞、冠詞、代名詞、数詞、前置詞、修飾、'
+             '動詞の形、活用、文の型、否定と疑問、従属節、小辞、語形成）、15〜28 は個別の主題（名詞文、分裂文と焦点、提示の文、引用、'
+             '受け身と使役、比較、借用語、用語の解説、時・場所・数量の表現、呼びかけ、条件文、転移など）</td>\n</tr>\n'
+             '<tr>\n<td>付録</td>\n<td>A〜F</td>\n<td>活用の早見表、練習問題解答、グロスの略号、例文の出典、統語論・意味論・語用論のまとめ、'
+             '他の文法書との対応、参考文献</td>\n</tr>')
+        assert t.count(a) == 1, (name, t.count(a)); t = t.replace(a, b)
         t = layer(t)
         open(os.path.join(out, name + '.html'), 'w', encoding='utf-8').write(t)
         print(name, len(t))
