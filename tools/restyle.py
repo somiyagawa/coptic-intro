@@ -12,7 +12,7 @@ BASE_DIR には改良前のページを置く（git show 2003160:sahidic.html > 
 import re, json, sys, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import kana_s, ang
+import kana_s, ang, add2
 
 UNIT = re.compile(r'(<span class="rt" aria-hidden="true"><span class="rl">.*?</span><span class="rk">)(.*?)(</span></span><span class="rw">)(.*?)(</span></span>)', re.S)
 
@@ -226,6 +226,11 @@ def main(base, out):
         assert t.count(a) == 1, (name, t.count(a)); t = t.replace(a, b)
         # 独立代名詞の短い形（ⲁⲛⲅ̄- の類）の説明を書き直す（tools/ang.py）
         t = ang.sahidic(t, regloss) if name == 'sahidic' else ang.bohairic(t)
+        # Layton の文法書と照らして抜けていた項目を書き足す（tools/add2.py）
+        t, ms, mb = add2.apply(t, 's' if name == 'sahidic' else 'b')
+        if os.environ.get('RB_SHOW'):
+            for lab, m in (('S', ms), ('B', mb)):
+                print(name, lab, 'new readings', len(m)); print('  ' + ' / '.join('%s=%s=%s' % (k, v[0], v[1]) for k, v in m.items()))
         t = layer(t)
         open(os.path.join(out, name + '.html'), 'w', encoding='utf-8').write(t)
         print(name, len(t))
